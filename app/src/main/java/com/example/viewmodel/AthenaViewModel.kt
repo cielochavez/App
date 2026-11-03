@@ -106,38 +106,140 @@ class AthenaViewModel @JvmOverloads constructor(
     private val _rebajasImageSlots = MutableStateFlow<List<RebajasImageSlot>>(
         listOf(
             RebajasImageSlot(
-                id = "slot-1",
-                title = "Corsets & Conjuntos",
-                subtitle = "Encaje & Ribbed 35% OFF",
-                drawableResId = R.drawable.banner_rebajas_1
+                id = "reb-slot-corset-encaje",
+                title = "Corset Encaje Floral (Trio)",
+                subtitle = "Blanco Nácar, Azul Cobalto & Rosa Palo",
+                drawableResId = R.drawable.rebajas_corset_encaje_trio,
+                price = 38.0,
+                originalPrice = 55.0,
+                associatedProductId = "reb-corset-1"
             ),
             RebajasImageSlot(
-                id = "slot-2",
-                title = "Camperas & Chalecos",
-                subtitle = "Térmicas con Piel",
-                drawableResId = R.drawable.banner_rebajas_2
+                id = "reb-slot-corset-leopardo",
+                title = "Corset Bustier Animal Print & Black",
+                subtitle = "Copa Armada, Tul & Varillas",
+                drawableResId = R.drawable.rebajas_corset_leopardo_negro,
+                price = 42.0,
+                originalPrice = 60.0,
+                associatedProductId = "reb-corset-2"
             ),
             RebajasImageSlot(
-                id = "slot-3",
-                title = "Strass & Buzos Urban",
-                subtitle = "Colección Olimpo 40% OFF",
-                drawableResId = R.drawable.banner_rebajas_3
+                id = "reb-slot-campera-piel",
+                title = "Campera Térmica con Piel Sherpa",
+                subtitle = "Marrón Caramelo & Beige Nieve",
+                drawableResId = R.drawable.rebajas_campera_piel_duo,
+                price = 78.0,
+                originalPrice = 110.0,
+                associatedProductId = "reb-campera-4"
+            ),
+            RebajasImageSlot(
+                id = "reb-slot-conjunto-canale",
+                title = "Conjunto Ribbed con Cierre",
+                subtitle = "Burdeos Vino & Marrón Oxford Flare",
+                drawableResId = R.drawable.rebajas_conjunto_canale_duo,
+                price = 65.0,
+                originalPrice = 89.0,
+                associatedProductId = "reb-conjunto-3"
+            ),
+            RebajasImageSlot(
+                id = "reb-slot-buzo-la",
+                title = "Buzo Los Angeles 91",
+                subtitle = "Oversize Streetwear • $13.000",
+                drawableResId = R.drawable.rebajas_buzo_losangeles_91,
+                price = 35.0,
+                originalPrice = 55.0,
+                associatedProductId = "reb-buzo-9"
             ),
             RebajasImageSlot(
                 id = "slot-empty-1",
-                title = "Espacio Lookbook #4",
+                title = "Espacio Lookbook #6",
                 subtitle = "Toca para agregar foto",
-                isPlaceholder = true
-            ),
-            RebajasImageSlot(
-                id = "slot-empty-2",
-                title = "Espacio Promocional #5",
-                subtitle = "Toca para agregar foto",
-                isPlaceholder = true
+                isPlaceholder = true,
+                price = 45.0
             )
         )
     )
     val rebajasImageSlots: StateFlow<List<RebajasImageSlot>> = _rebajasImageSlots.asStateFlow()
+
+    // ---------------- ADIDAS IMAGE SPACES (SLOTS & UPLOADS) ---------------- //
+    private val _adidasImageSlots = MutableStateFlow<List<RebajasImageSlot>>(
+        listOf(
+            RebajasImageSlot(
+                id = "adidas-slot-1",
+                title = "Campera de Jean Adidas",
+                subtitle = "Denim Jacket 3 Tiras Vintage",
+                drawableResId = R.drawable.prod_campera_jean_adidas,
+                price = 98.0,
+                originalPrice = 135.0,
+                associatedProductId = "adi-campera-jean-1"
+            ),
+            RebajasImageSlot(
+                id = "adidas-slot-2",
+                title = "Conjunto 3 Piezas Adidas",
+                subtitle = "Campera Crop, Top & Short",
+                drawableResId = R.drawable.prod_conjunto_3piezas_adidas,
+                price = 88.0,
+                originalPrice = 120.0,
+                associatedProductId = "adi-conjunto-3p-2"
+            ),
+            RebajasImageSlot(
+                id = "adidas-slot-empty-1",
+                title = "Espacio Adidas #3",
+                subtitle = "Toca para subir foto de prenda",
+                isPlaceholder = true,
+                price = 55.0
+            ),
+            RebajasImageSlot(
+                id = "adidas-slot-empty-2",
+                title = "Espacio Adidas #4",
+                subtitle = "Toca para subir foto de prenda",
+                isPlaceholder = true,
+                price = 60.0
+            )
+        )
+    )
+    val adidasImageSlots: StateFlow<List<RebajasImageSlot>> = _adidasImageSlots.asStateFlow()
+
+    // ---------------- CONJUNTOS IMAGE SPACES (SET MALIBÚ & SETS) ---------------- //
+    private val _conjuntosImageSlots = MutableStateFlow<List<RebajasImageSlot>>(
+        listOf(
+            RebajasImageSlot(
+                id = "conj-malibu-celeste",
+                title = "Set Malibú Celeste",
+                subtitle = "Top Halter Cierre & Oxford Flare",
+                drawableResId = R.drawable.prod_set_malibu_celeste,
+                price = 68.0,
+                originalPrice = 95.0,
+                associatedProductId = "set-malibu-celeste"
+            ),
+            RebajasImageSlot(
+                id = "conj-malibu-rosa",
+                title = "Set Malibú Rosa Pastel",
+                subtitle = "Silueta Estilizada & Tiro Alto",
+                drawableResId = R.drawable.prod_set_malibu_rosa,
+                price = 68.0,
+                originalPrice = 95.0,
+                associatedProductId = "set-malibu-rosa"
+            ),
+            RebajasImageSlot(
+                id = "conj-malibu-marron",
+                title = "Set Malibú Marrón Chocolate",
+                subtitle = "Canalé Premium Stretch",
+                drawableResId = R.drawable.prod_set_malibu_marron,
+                price = 68.0,
+                originalPrice = 95.0,
+                associatedProductId = "set-malibu-marron"
+            ),
+            RebajasImageSlot(
+                id = "conj-slot-empty-1",
+                title = "Espacio Conjuntos #4",
+                subtitle = "Toca para subir foto de prenda",
+                isPlaceholder = true,
+                price = 65.0
+            )
+        )
+    )
+    val conjuntosImageSlots: StateFlow<List<RebajasImageSlot>> = _conjuntosImageSlots.asStateFlow()
 
     // Notification filter
     val notificationFilter = MutableStateFlow(NotificationType.ALL)
@@ -168,6 +270,8 @@ class AthenaViewModel @JvmOverloads constructor(
             val matchesCat = when (criteria.cat) {
                 ProductCategory.ALL -> true
                 ProductCategory.REBAJAS -> p.discountPercent != null && p.discountPercent!! > 0
+                ProductCategory.SETS -> p.category == ProductCategory.SETS || p.category == ProductCategory.ADIDAS
+                ProductCategory.ADIDAS -> p.category == ProductCategory.ADIDAS || (p.category == ProductCategory.SETS && p.name.contains("Adidas", ignoreCase = true))
                 else -> p.category == criteria.cat
             }
             val matchesSize = criteria.size == null || p.sizes.contains(criteria.size)
@@ -229,6 +333,16 @@ class AthenaViewModel @JvmOverloads constructor(
     // Navigation methods
     fun navigateTo(screen: AthenaScreen) {
         _currentScreen.value = screen
+    }
+
+    fun openMenuSection(category: ProductCategory) {
+        selectedCategory.value = category
+        if (category == ProductCategory.REBAJAS) {
+            isOnlySaleFilter.value = true
+        } else {
+            isOnlySaleFilter.value = false
+        }
+        _currentScreen.value = AthenaScreen.CATALOG
     }
 
     fun openProductDetail(product: Product) {
@@ -355,6 +469,174 @@ class AthenaViewModel @JvmOverloads constructor(
         _rebajasImageSlots.update { current ->
             current.filterNot { it.id == slotId }
         }
+    }
+
+    // ---------------- ADIDAS IMAGE SPACES MANAGEMENT ---------------- //
+    fun addAdidasImageToSlot(slotId: String, imageUri: String, title: String? = null) {
+        _adidasImageSlots.update { current ->
+            current.map { slot ->
+                if (slot.id == slotId) {
+                    slot.copy(
+                        title = title ?: slot.title.replace("Espacio", "Look"),
+                        subtitle = "Imagen añadida a Adidas",
+                        imageUri = imageUri,
+                        drawableResId = null,
+                        isPlaceholder = false
+                    )
+                } else slot
+            }
+        }
+        repository.sendPushNotification(
+            title = "Nueva Foto en Colección Adidas",
+            message = "Se actualizó la foto en el espacio de Conjuntos Adidas.",
+            type = NotificationType.PROMO_DROP
+        )
+    }
+
+    fun addAdidasNewImage(title: String, imageUri: String) {
+        val newSlot = RebajasImageSlot(
+            id = "adidas-slot-custom-" + System.currentTimeMillis(),
+            title = title.ifBlank { "Nuevo Look Adidas" },
+            subtitle = "Foto agregada por el usuario",
+            imageUri = imageUri,
+            drawableResId = null,
+            isPlaceholder = false
+        )
+        _adidasImageSlots.update { current ->
+            val filled = current.filter { !it.isPlaceholder }
+            val placeholders = current.filter { it.isPlaceholder }
+            filled + newSlot + placeholders
+        }
+        repository.sendPushNotification(
+            title = "Foto Adidas Añadida",
+            message = "Se añadió '$title' a la colección Adidas.",
+            type = NotificationType.PROMO_DROP
+        )
+    }
+
+    fun removeAdidasSlot(slotId: String) {
+        _adidasImageSlots.update { current ->
+            current.filterNot { it.id == slotId }
+        }
+    }
+
+    // ---------------- CONJUNTOS IMAGE SPACES MANAGEMENT ---------------- //
+    fun addConjuntosImageToSlot(slotId: String, imageUri: String, title: String? = null) {
+        _conjuntosImageSlots.update { current ->
+            current.map { slot ->
+                if (slot.id == slotId) {
+                    slot.copy(
+                        title = title ?: slot.title.replace("Espacio", "Look"),
+                        subtitle = "Imagen añadida a Conjuntos",
+                        imageUri = imageUri,
+                        drawableResId = null,
+                        isPlaceholder = false
+                    )
+                } else slot
+            }
+        }
+        repository.sendPushNotification(
+            title = "Nueva Foto en Conjuntos",
+            message = "Se actualizó la foto en el espacio de Conjuntos & Set Malibú.",
+            type = NotificationType.PROMO_DROP
+        )
+    }
+
+    fun addConjuntosNewImage(title: String, imageUri: String) {
+        val newSlot = RebajasImageSlot(
+            id = "conj-slot-custom-" + System.currentTimeMillis(),
+            title = title.ifBlank { "Nuevo Set Malibú" },
+            subtitle = "Foto agregada por el usuario",
+            imageUri = imageUri,
+            drawableResId = null,
+            isPlaceholder = false
+        )
+        _conjuntosImageSlots.update { current ->
+            val filled = current.filter { !it.isPlaceholder }
+            val placeholders = current.filter { it.isPlaceholder }
+            filled + newSlot + placeholders
+        }
+        repository.sendPushNotification(
+            title = "Foto de Conjunto Añadida",
+            message = "Se añadió '$title' a la colección de Conjuntos.",
+            type = NotificationType.PROMO_DROP
+        )
+    }
+
+    fun removeConjuntosSlot(slotId: String) {
+        _conjuntosImageSlots.update { current ->
+            current.filterNot { it.id == slotId }
+        }
+    }
+
+    // ---------------- PRECIOS & COMPRA DIRECTA DESDE IMÁGENES ---------------- //
+    fun updateSlotPrice(slotId: String, newPrice: Double) {
+        _rebajasImageSlots.update { list ->
+            list.map { if (it.id == slotId) it.copy(price = newPrice) else it }
+        }
+        _adidasImageSlots.update { list ->
+            list.map { if (it.id == slotId) it.copy(price = newPrice) else it }
+        }
+        _conjuntosImageSlots.update { list ->
+            list.map { if (it.id == slotId) it.copy(price = newPrice) else it }
+        }
+        repository.sendPushNotification(
+            title = "Precio Actualizado",
+            message = "Se actualizó el precio a $${String.format(Locale.US, "%.2f", newPrice)} correctamente.",
+            type = NotificationType.PROMO_DROP
+        )
+    }
+
+    fun updateProductPrice(productId: String, newPrice: Double) {
+        repository.updateProductPrice(productId, newPrice)
+        // Also keep any connected slot in sync
+        _rebajasImageSlots.update { list ->
+            list.map { if (it.associatedProductId == productId) it.copy(price = newPrice) else it }
+        }
+        _adidasImageSlots.update { list ->
+            list.map { if (it.associatedProductId == productId) it.copy(price = newPrice) else it }
+        }
+        _conjuntosImageSlots.update { list ->
+            list.map { if (it.associatedProductId == productId) it.copy(price = newPrice) else it }
+        }
+        repository.sendPushNotification(
+            title = "Precio de Prenda Actualizado",
+            message = "Nuevo precio: $${String.format(Locale.US, "%.2f", newPrice)}.",
+            type = NotificationType.INVENTORY_ALERT
+        )
+    }
+
+    fun addSlotToCart(slot: RebajasImageSlot) {
+        val prod = slot.associatedProductId?.let { id -> products.value.find { it.id == id } }
+            ?: products.value.find { it.name.contains(slot.title, ignoreCase = true) || slot.title.contains(it.name, ignoreCase = true) }
+            ?: Product(
+                id = "slot-prod-" + slot.id,
+                name = slot.title,
+                category = ProductCategory.REBAJAS,
+                price = slot.price ?: 35.0,
+                originalPrice = slot.originalPrice ?: 50.0,
+                sizes = listOf("S", "M", "L"),
+                colors = listOf(ProductColor("Tono Prenda", 0xFFE0A96D)),
+                description = slot.subtitle ?: "Prenda exclusiva de colección",
+                fabric = "Algodón peinado y tejido premium",
+                stock = 10,
+                sku = "ATH-SLOT-" + slot.id.takeLast(4).uppercase(),
+                rating = 4.9f,
+                reviewsCount = 15,
+                imageResName = if (slot.drawableResId != null) "rebajas_corset_encaje_trio" else "athena_cover"
+            )
+
+        val finalProd = if (slot.price != null && slot.price > 0.0) {
+            prod.copy(price = slot.price)
+        } else {
+            prod
+        }
+
+        addToCart(
+            product = finalProd,
+            size = finalProd.sizes.firstOrNull() ?: "M",
+            color = finalProd.colors.firstOrNull() ?: ProductColor("Único", 0xFFFFFFFF)
+        )
     }
 
     // ---------------- CART ACTIONS ---------------- //

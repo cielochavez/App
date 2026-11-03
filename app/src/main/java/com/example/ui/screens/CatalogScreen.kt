@@ -21,23 +21,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddPhotoAlternate
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -51,7 +46,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -61,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -74,12 +67,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.R
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.ui.text.style.TextDecoration
+import com.example.model.ProductColor
+import com.example.ui.components.PriceEditDialog
+import com.example.ui.theme.AthenaGoldDark
+import java.util.Locale
 import com.example.model.Product
 import com.example.model.ProductCategory
 import com.example.model.RebajasImageSlot
 import com.example.ui.components.ProductCard
-import com.example.ui.theme.AthenaGold
-import com.example.ui.theme.AthenaGoldDark
 import com.example.ui.theme.AthenaPink
 import com.example.ui.theme.CrimsonSale
 import com.example.ui.theme.ObsidianNight
@@ -95,17 +94,18 @@ fun CatalogScreen(
     val filteredProducts by viewModel.filteredProducts.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
-    val selectedSizeFilter by viewModel.selectedSizeFilter.collectAsState()
     val isOnlySaleFilter by viewModel.isOnlySaleFilter.collectAsState()
-    val isOnlyInStockFilter by viewModel.isOnlyInStockFilter.collectAsState()
     val wishlistProductIds by viewModel.wishlistProductIds.collectAsState()
     val rebajasSlots by viewModel.rebajasImageSlots.collectAsState()
+    val adidasSlots by viewModel.adidasImageSlots.collectAsState()
+    val conjuntosSlots by viewModel.conjuntosImageSlots.collectAsState()
 
-    // State for image slot assignment via photo picker
     var activeTargetSlotId by remember { mutableStateOf<String?>(null) }
-    var showUrlDialog by remember { mutableStateOf(false) }
-    var customUrlInput by remember { mutableStateOf("") }
-    var customTitleInput by remember { mutableStateOf("") }
+    var activeSlotType by remember { mutableStateOf("rebajas") } // "rebajas", "adidas", or "conjuntos"
+
+    // Dialog states for adding/editing prices
+    var slotForPriceEdit by remember { mutableStateOf<RebajasImageSlot?>(null) }
+    var productForPriceEdit by remember { mutableStateOf<Product?>(null) }
 
     // Android zero-permission Photo Picker
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -113,335 +113,253 @@ fun CatalogScreen(
     ) { uri: Uri? ->
         if (uri != null) {
             val targetId = activeTargetSlotId
-            if (targetId != null) {
-                viewModel.addRebajasImageToSlot(targetId, uri.toString())
-            } else {
-                viewModel.addRebajasNewImage("Look Exclusivo", uri.toString())
+            when (activeSlotType) {
+                "adidas" -> {
+                    if (targetId != null) {
+                        viewModel.addAdidasImageToSlot(targetId, uri.toString())
+                    } else {
+                        viewModel.addAdidasNewImage("Prenda Adidas", uri.toString())
+                    }
+                }
+                "conjuntos" -> {
+                    if (targetId != null) {
+                        viewModel.addConjuntosImageToSlot(targetId, uri.toString())
+                    } else {
+                        viewModel.addConjuntosNewImage("Set Malibú / Conjunto", uri.toString())
+                    }
+                }
+                else -> {
+                    if (targetId != null) {
+                        viewModel.addRebajasImageToSlot(targetId, uri.toString())
+                    } else {
+                        viewModel.addRebajasNewImage("Prenda Rebajas", uri.toString())
+                    }
+                }
             }
         }
         activeTargetSlotId = null
     }
 
-    // LazyVerticalGrid that is fully and smoothly scrollable downwards
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 120.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+    // Smooth downwards scrolling column with large, prominent photo spaces and simple UI
+    LazyColumn(
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 100.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
         modifier = modifier
             .fillMaxSize()
             .testTag("catalog_grid")
     ) {
-        // Hero Editorial Banner / Foto de Portada en Rebajas
-        item(span = { GridItemSpan(2) }) {
-            val isRebajasActive = isOnlySaleFilter || selectedCategory == ProductCategory.REBAJAS
-
-            if (isRebajasActive) {
-                // FOTO DE PORTADA EN REBAJAS (BANNER OFICIAL BOUTIQUE ATHENA STYLE)
-                Card(
-                    shape = RoundedCornerShape(22.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp, bottom = 4.dp)
-                        .clip(RoundedCornerShape(22.dp))
-                        .testTag("portada_rebajas_banner_card")
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFF0F0E16))
+        // 1. MENÚ PRINCIPAL: REBAJAS • ADIDAS • CONJUNTOS (SIMPLE Y ELEGANTE)
+        item {
+            Card(
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF14121E)),
+                border = BorderStroke(1.2.dp, AthenaPink.copy(alpha = 0.6f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("catalog_main_menu_card")
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Hero Portada Image (Glowing Neon BOUTIQUE ATHENA_STYLE_)
-                        Box(
-                            contentAlignment = Alignment.Center,
+                        Text(
+                            text = "MENÚ",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.5.sp,
+                            color = AthenaPink
+                        )
+
+                        // Pequeño acceso para ver todo
+                        Text(
+                            text = if (selectedCategory == ProductCategory.ALL) "• Viendo Todo •" else "Ver Todo",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (selectedCategory == ProductCategory.ALL) AthenaPink else Color.White.copy(alpha = 0.6f),
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp)
-                                .background(Color(0xFF0B0A10))
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.banner_portada_rebajas),
-                                contentDescription = "Foto de Portada en Rebajas - Boutique Athena Style",
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                            )
-
-                            // Status Tag
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .align(Alignment.TopStart)
-                                    .padding(12.dp)
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(CrimsonSale)
-                                    .padding(horizontal = 10.dp, vertical = 5.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(6.dp)
-                                        .clip(CircleShape)
-                                        .background(Color.White)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "🔥 PORTADA EN REBAJAS",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 1.sp,
-                                    color = Color.White
-                                )
-                            }
-                        }
-
-                        // Bottom Actions & Details
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "BOUTIQUE • REBAJAS DE TEMPORADA",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 1.2.sp,
-                                    color = AthenaPink
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = "Prendas oficiales reales con hasta 40% OFF",
-                                    fontSize = 11.sp,
-                                    color = Color.White.copy(alpha = 0.85f)
-                                )
-                            }
-
-                            Button(
-                                onClick = {
-                                    viewModel.isOnlySaleFilter.value = false
+                                .clickable {
                                     viewModel.selectedCategory.value = ProductCategory.ALL
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.White.copy(alpha = 0.15f),
-                                    contentColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(12.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                            ) {
-                                Text(
-                                    text = "Ver Todo",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
+                                    viewModel.isOnlySaleFilter.value = false
+                                }
+                                .padding(4.dp)
+                        )
                     }
-                }
-            } else {
-                Card(
-                    shape = RoundedCornerShape(22.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp, bottom = 4.dp)
-                        .clip(RoundedCornerShape(22.dp))
-                        .testTag("editorial_hero_banner")
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(190.dp)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.athena_cover),
-                            contentDescription = "Athena Style Portada Oficial",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-
-                        // Gradient Scrim
-                        Box(
+                        // 1. BOTÓN REBAJAS
+                        val isRebajas = isOnlySaleFilter || selectedCategory == ProductCategory.REBAJAS
+                        Button(
+                            onClick = {
+                                viewModel.openMenuSection(ProductCategory.REBAJAS)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isRebajas) CrimsonSale else Color(0xFF222030),
+                                contentColor = Color.White
+                            ),
+                            border = BorderStroke(1.2.dp, if (isRebajas) CrimsonSale else Color.Transparent),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                             modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color.Black.copy(alpha = 0.25f),
-                                            Color.Black.copy(alpha = 0.8f)
-                                        )
-                                    )
-                                )
-                        )
-
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(16.dp)
+                                .weight(1f)
+                                .height(46.dp)
+                                .testTag("menu_tab_rebajas")
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = null,
-                                    tint = AthenaGold,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "NUEVA TEMPORADA 2026",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.5.sp,
-                                    color = AthenaGold
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Colección Olimpo",
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif,
-                                color = Color.White
+                                text = "🔥 Rebajas",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
                             )
+                        }
+
+                        // 2. BOTÓN ADIDAS
+                        val isAdidas = selectedCategory == ProductCategory.ADIDAS
+                        Button(
+                            onClick = {
+                                viewModel.openMenuSection(ProductCategory.ADIDAS)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isAdidas) AthenaPink else Color(0xFF222030),
+                                contentColor = if (isAdidas) Color.Black else AthenaPink
+                            ),
+                            border = BorderStroke(1.2.dp, if (isAdidas) AthenaPink else Color.Transparent),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp)
+                                .testTag("menu_tab_adidas")
+                        ) {
                             Text(
-                                text = "Siluetas esculturales en seda y lino fino.",
+                                text = "👟 Adidas",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+
+                        // 3. BOTÓN CONJUNTOS
+                        val isConjuntos = selectedCategory == ProductCategory.SETS
+                        Button(
+                            onClick = {
+                                viewModel.openMenuSection(ProductCategory.SETS)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isConjuntos) Color.White else Color(0xFF222030),
+                                contentColor = if (isConjuntos) Color(0xFF14121E) else Color.White
+                            ),
+                            border = BorderStroke(1.2.dp, if (isConjuntos) Color.White else Color.Transparent),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp)
+                                .testTag("menu_tab_conjuntos")
+                        ) {
+                            Text(
+                                text = "✨ Conjuntos",
                                 fontSize = 12.sp,
-                                color = Color.White.copy(alpha = 0.85f)
+                                fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(
-                                onClick = {
-                                    viewModel.isOnlySaleFilter.value = true
-                                    viewModel.selectedCategory.value = ProductCategory.REBAJAS
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = CrimsonSale,
-                                    contentColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(12.dp),
-                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                                modifier = Modifier.testTag("explore_olympus_btn")
-                            ) {
-                                Text(
-                                    text = "🔥 Ver Rebajas Exclusivas",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
                         }
                     }
                 }
             }
         }
 
-        // ESPACIOS PARA AGREGAR IMÁGENES EN REBAJAS (Mandatory User Feature)
-        item(span = { GridItemSpan(2) }) {
-            val isRebajasActive = isOnlySaleFilter || selectedCategory == ProductCategory.REBAJAS
+        // 2. CONTENIDO SEGÚN LA SECCIÓN DEL MENÚ SELECCIONADA
+        val isRebajasActive = isOnlySaleFilter || selectedCategory == ProductCategory.REBAJAS
+        val isAdidasActive = selectedCategory == ProductCategory.ADIDAS
+        val isConjuntosActive = selectedCategory == ProductCategory.SETS
 
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isRebajasActive) Color(0xFF13121D) else MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .testTag("rebajas_image_spaces_section")
-            ) {
+        // SECCIÓN REBAJAS: PORTADA + ESPACIOS PARA FOTOS REBAJAS
+        if (isRebajasActive) {
+            // Portada Rebajas
+            item {
+                Card(
+                    shape = RoundedCornerShape(22.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("portada_rebajas_banner_card")
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(Color(0xFF0F0E16))
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.banner_portada_rebajas),
+                            contentDescription = "Portada Rebajas",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(12.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(CrimsonSale)
+                                .padding(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "🔥 REBAJAS ATELIER",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Espacios para agregar fotos de Rebajas
+            item {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(14.dp)
+                        .testTag("rebajas_image_spaces_section")
                 ) {
-                    // Header with title and Add Buttons
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.AddPhotoAlternate,
-                                    contentDescription = null,
-                                    tint = AthenaPink,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "ESPACIOS PARA AGREGAR IMÁGENES",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 1.sp,
-                                    color = AthenaPink
-                                )
-                            }
-                            Text(
-                                text = "Sube looks, fotos de prendas y promociones para Rebajas",
-                                fontSize = 11.sp,
-                                color = if (isRebajasActive) Color.White.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            // Quick Add Space Button
-                            IconButton(
-                                onClick = {
-                                    viewModel.addEmptyRebajasSlot()
-                                },
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(AthenaPink.copy(alpha = 0.15f))
-                                    .testTag("add_empty_slot_btn")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Añadir Espacio",
-                                    tint = AthenaPink,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                    }
+                    Text(
+                        text = "ESPACIOS PARA AGREGAR FOTOS",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp,
+                        color = AthenaPink
+                    )
+                    Text(
+                        text = "Sube fotos de prendas de rebajas desde tu galería.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Horizontal Carousel of Image Slots
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState())
                     ) {
-                        rebajasSlots.forEach { slot ->
-                            RebajasImageSlotCard(
-                                slot = slot,
-                                onUploadClick = {
-                                    activeTargetSlotId = slot.id
-                                    photoPickerLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    )
-                                },
-                                onRemoveClick = {
-                                    viewModel.removeRebajasSlot(slot.id)
-                                }
-                            )
-                        }
-
-                        // Add new slot button card at end of carousel
+                        // Tarjeta + Subir Foto de Prenda
                         Card(
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.06f)),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
                             modifier = Modifier
-                                .width(150.dp)
-                                .height(160.dp)
-                                .border(1.5.dp, AthenaPink.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                                .width(260.dp)
+                                .height(290.dp)
+                                .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
                                 .clickable {
+                                    activeSlotType = "rebajas"
                                     activeTargetSlotId = null
                                     photoPickerLauncher.launch(
                                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -454,12 +372,12 @@ fun CatalogScreen(
                                 verticalArrangement = Arrangement.Center,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(12.dp)
+                                    .padding(18.dp)
                             ) {
                                 Box(
                                     contentAlignment = Alignment.Center,
                                     modifier = Modifier
-                                        .size(42.dp)
+                                        .size(64.dp)
                                         .clip(CircleShape)
                                         .background(AthenaPink.copy(alpha = 0.2f))
                                 ) {
@@ -467,22 +385,205 @@ fun CatalogScreen(
                                         imageVector = Icons.Default.AddPhotoAlternate,
                                         contentDescription = "Subir foto",
                                         tint = AthenaPink,
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(36.dp)
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(14.dp))
                                 Text(
-                                    text = "+ Subir Imagen",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    text = "+ Subir Foto de Prenda",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.ExtraBold,
                                     color = AthenaPink,
                                     textAlign = TextAlign.Center
                                 )
+                                Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    text = "De tu Galería",
-                                    fontSize = 10.sp,
-                                    color = Color.White.copy(alpha = 0.7f),
+                                    text = "Elige de tu galería",
+                                    fontSize = 12.sp,
+                                    color = Color.White.copy(alpha = 0.75f),
                                     textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+
+                        // Espacios para fotos de Rebajas
+                        rebajasSlots.forEach { slot ->
+                            LargePhotoSlotCard(
+                                slot = slot,
+                                onUploadClick = {
+                                    activeSlotType = "rebajas"
+                                    activeTargetSlotId = slot.id
+                                    photoPickerLauncher.launch(
+                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                    )
+                                },
+                                onRemoveClick = {
+                                    viewModel.removeRebajasSlot(slot.id)
+                                },
+                                onEditPriceClick = {
+                                    slotForPriceEdit = slot
+                                },
+                                onAddToCartClick = {
+                                    viewModel.addSlotToCart(slot)
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // SECCIÓN ADIDAS: ENCABEZADO + ESPACIOS PARA FOTOS ADIDAS
+        if (isAdidasActive) {
+            item {
+                Card(
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF14131D)),
+                    border = BorderStroke(1.5.dp, AthenaPink),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("adidas_collection_header_card")
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "👟 COLECCIÓN ADIDAS",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Campera de Jean 3 Tiras & Conjunto 3 Piezas",
+                                    fontSize = 12.sp,
+                                    color = Color.White.copy(alpha = 0.75f)
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(AthenaPink)
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "ORIGINALS",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.Black
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // ESPACIOS PARA AGREGAR IMÁGENES ADIDAS
+                        Text(
+                            text = "ESPACIOS PARA IMÁGENES ADIDAS",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp,
+                            color = AthenaPink
+                        )
+                        Text(
+                            text = "Toca cualquier espacio para subir fotos de prendas Adidas desde tu galería.",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                        ) {
+                            // Tarjeta + Subir Foto Adidas
+                            Card(
+                                shape = RoundedCornerShape(20.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+                                modifier = Modifier
+                                    .width(260.dp)
+                                    .height(290.dp)
+                                    .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
+                                    .clickable {
+                                        activeSlotType = "adidas"
+                                        activeTargetSlotId = null
+                                        photoPickerLauncher.launch(
+                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        )
+                                    }
+                                    .testTag("slot_add_adidas_photo_card")
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(18.dp)
+                                ) {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .size(64.dp)
+                                            .clip(CircleShape)
+                                            .background(AthenaPink.copy(alpha = 0.2f))
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.AddPhotoAlternate,
+                                            contentDescription = "Subir foto Adidas",
+                                            tint = AthenaPink,
+                                            modifier = Modifier.size(36.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    Text(
+                                        text = "+ Subir Foto Adidas",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = AthenaPink,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "Elige de tu galería",
+                                        fontSize = 12.sp,
+                                        color = Color.White.copy(alpha = 0.75f),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+
+                            // Espacios con fotos cargadas (Campera jean, Conjunto 3 piezas, etc.)
+                            adidasSlots.forEach { slot ->
+                                LargePhotoSlotCard(
+                                    slot = slot,
+                                    onUploadClick = {
+                                        activeSlotType = "adidas"
+                                        activeTargetSlotId = slot.id
+                                        photoPickerLauncher.launch(
+                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        )
+                                    },
+                                    onRemoveClick = {
+                                        viewModel.removeAdidasSlot(slot.id)
+                                    },
+                                    onEditPriceClick = {
+                                        slotForPriceEdit = slot
+                                    },
+                                    onAddToCartClick = {
+                                        viewModel.addSlotToCart(slot)
+                                    }
                                 )
                             }
                         }
@@ -491,14 +592,178 @@ fun CatalogScreen(
             }
         }
 
-        // Search Bar
-        item(span = { GridItemSpan(2) }) {
+        // SECCIÓN CONJUNTOS: ENCABEZADO SET MALIBÚ & ESPACIOS PARA FOTOS
+        if (isConjuntosActive) {
+            item {
+                Card(
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF14121E)),
+                    border = BorderStroke(1.2.dp, Color.White.copy(alpha = 0.5f)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("conjuntos_header_card")
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "✨ COLECCIÓN SET MALIBÚ & CONJUNTOS",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Top halter con cierre frontal & pantalón flare oxford en 3 tonos",
+                                    fontSize = 12.sp,
+                                    color = Color.White.copy(alpha = 0.75f)
+                                )
+                            }
+
+                            // Botón de Adidas dentro de Conjuntos
+                            Button(
+                                onClick = {
+                                    viewModel.openMenuSection(ProductCategory.ADIDAS)
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = AthenaPink,
+                                    contentColor = Color.Black
+                                ),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.testTag("btn_adidas_inside_conjuntos")
+                            ) {
+                                Text(
+                                    text = "👟 Ver Adidas",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Black
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // ESPACIOS PARA AGREGAR IMÁGENES SET MALIBÚ & CONJUNTOS
+                        Text(
+                            text = "ESPACIOS PARA IMÁGENES SET MALIBÚ",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp,
+                            color = AthenaPink
+                        )
+                        Text(
+                            text = "Fotos reales del Set Malibú en celeste, rosa y marrón chocolate.",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                        ) {
+                            // Tarjeta + Subir Foto Conjunto
+                            Card(
+                                shape = RoundedCornerShape(20.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+                                modifier = Modifier
+                                    .width(260.dp)
+                                    .height(290.dp)
+                                    .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
+                                    .clickable {
+                                        activeSlotType = "conjuntos"
+                                        activeTargetSlotId = null
+                                        photoPickerLauncher.launch(
+                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        )
+                                    }
+                                    .testTag("slot_add_conjuntos_photo_card")
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(18.dp)
+                                ) {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .size(64.dp)
+                                            .clip(CircleShape)
+                                            .background(AthenaPink.copy(alpha = 0.2f))
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.AddPhotoAlternate,
+                                            contentDescription = "Subir foto Conjunto",
+                                            tint = AthenaPink,
+                                            modifier = Modifier.size(36.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    Text(
+                                        text = "+ Subir Foto Conjunto",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = AthenaPink,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "Elige de tu galería",
+                                        fontSize = 12.sp,
+                                        color = Color.White.copy(alpha = 0.75f),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+
+                            // Espacios con fotos cargadas del Set Malibú (Celeste, Rosa, Marrón)
+                            conjuntosSlots.forEach { slot ->
+                                LargePhotoSlotCard(
+                                    slot = slot,
+                                    onUploadClick = {
+                                        activeSlotType = "conjuntos"
+                                        activeTargetSlotId = slot.id
+                                        photoPickerLauncher.launch(
+                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        )
+                                    },
+                                    onRemoveClick = {
+                                        viewModel.removeConjuntosSlot(slot.id)
+                                    },
+                                    onEditPriceClick = {
+                                        slotForPriceEdit = slot
+                                    },
+                                    onAddToCartClick = {
+                                        viewModel.addSlotToCart(slot)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. BARRA DE BÚSQUEDA COMPACTA
+        item {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.searchQuery.value = it },
                 placeholder = {
                     Text(
-                        text = "Buscar vestidos, sedas, blazer, SKU...",
+                        text = "Buscar prenda...",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -507,7 +772,8 @@ fun CatalogScreen(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Buscar",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = AthenaPink,
+                        modifier = Modifier.size(20.dp)
                     )
                 },
                 trailingIcon = {
@@ -515,16 +781,17 @@ fun CatalogScreen(
                         IconButton(onClick = { viewModel.searchQuery.value = "" }) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
-                                contentDescription = "Limpiar búsqueda"
+                                contentDescription = "Limpiar",
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = AthenaGold,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+                    focusedBorderColor = AthenaPink,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 ),
@@ -534,199 +801,24 @@ fun CatalogScreen(
             )
         }
 
-        // Category Filter Chips Carousel
-        item(span = { GridItemSpan(2) }) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(vertical = 2.dp)
-            ) {
-                ProductCategory.values().forEach { category ->
-                    val isSelected = selectedCategory == category
-                    val isRebajas = category == ProductCategory.REBAJAS
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = {
-                            viewModel.selectedCategory.value = category
-                            if (isRebajas) {
-                                viewModel.isOnlySaleFilter.value = true
-                            }
-                        },
-                        label = {
-                            Text(
-                                text = category.displayName,
-                                fontSize = 12.sp,
-                                fontWeight = if (isSelected || isRebajas) FontWeight.Bold else FontWeight.Normal
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = if (isRebajas) CrimsonSale else ObsidianNight,
-                            selectedLabelColor = Color.White,
-                            containerColor = if (isRebajas) CrimsonSale.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = isSelected,
-                            borderColor = if (isRebajas) CrimsonSale else if (isSelected) AthenaGold else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
-                        ),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.testTag("category_chip_${category.name}")
-                    )
-                }
+        // TÍTULO DE PRENDAS
+        item {
+            val sectionTitle = when {
+                isRebajasActive -> "PRENDAS EN REBAJAS 🔥"
+                isAdidasActive -> "PRENDAS Y CONJUNTOS ADIDAS 👟"
+                isConjuntosActive -> "CONJUNTOS & TRAJES ✨"
+                else -> "CATÁLOGO DE PRENDAS"
             }
+            Text(
+                text = sectionTitle,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.sp,
+                color = Color.White
+            )
         }
 
-        // Secondary Filters: Size, Sale, Stock
-        item(span = { GridItemSpan(2) }) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-            ) {
-                // Size filter chips
-                listOf("XS", "S", "M", "L", "XL").forEach { size ->
-                    val isSizeSelected = selectedSizeFilter == size
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (isSizeSelected) AthenaGold else MaterialTheme.colorScheme.surface
-                            )
-                            .clickable {
-                                viewModel.selectedSizeFilter.value = if (isSizeSelected) null else size
-                            }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                            .testTag("size_filter_$size")
-                    ) {
-                        Text(
-                            text = "Talla $size",
-                            fontSize = 11.sp,
-                            fontWeight = if (isSizeSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSizeSelected) ObsidianNight else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-
-                // In Stock toggle
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            if (isOnlyInStockFilter) ObsidianNight else MaterialTheme.colorScheme.surface
-                        )
-                        .clickable {
-                            viewModel.isOnlyInStockFilter.value = !isOnlyInStockFilter
-                        }
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                        .testTag("in_stock_toggle")
-                ) {
-                    Text(
-                        text = "En Stock",
-                        fontSize = 11.sp,
-                        fontWeight = if (isOnlyInStockFilter) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isOnlyInStockFilter) AthenaGold else MaterialTheme.colorScheme.onSurface
-                    )
-                }
-
-                // Sale toggle
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            if (isOnlySaleFilter) CrimsonSale else MaterialTheme.colorScheme.surface
-                        )
-                        .clickable {
-                            viewModel.isOnlySaleFilter.value = !isOnlySaleFilter
-                        }
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                        .testTag("sale_toggle")
-                ) {
-                    Text(
-                        text = "% En Descuento",
-                        fontSize = 11.sp,
-                        fontWeight = if (isOnlySaleFilter) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isOnlySaleFilter) Color.White else MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-        }
-
-        // Header Results Count
-        item(span = { GridItemSpan(2) }) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
-                Text(
-                    text = "${filteredProducts.size} prendas exclusivas",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                if (searchQuery.isNotBlank() || selectedCategory != ProductCategory.ALL || selectedSizeFilter != null || isOnlySaleFilter || isOnlyInStockFilter) {
-                    Text(
-                        text = "Restablecer filtros",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AthenaGoldDark,
-                        modifier = Modifier
-                            .clickable {
-                                viewModel.searchQuery.value = ""
-                                viewModel.selectedCategory.value = ProductCategory.ALL
-                                viewModel.selectedSizeFilter.value = null
-                                viewModel.isOnlySaleFilter.value = false
-                                viewModel.isOnlyInStockFilter.value = false
-                            }
-                            .testTag("reset_filters_btn")
-                    )
-                }
-            }
-        }
-
-        // Empty State
-        if (filteredProducts.isEmpty()) {
-            item(span = { GridItemSpan(2) }) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FilterList,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "No se encontraron prendas",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Intenta ajustar tus filtros de búsqueda o categoría.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-
-        // Products Grid with Room Wishlist connection
+        // 5. LISTA DE PRENDAS CON FOTOS GRANDES (UNA POR FILA, IMPACTO VISUAL MÁXIMO)
         items(filteredProducts, key = { it.id }) { product ->
             ProductCard(
                 product = product,
@@ -737,28 +829,59 @@ fun CatalogScreen(
                     viewModel.addToCart(
                         product = product,
                         size = product.sizes.firstOrNull() ?: "M",
-                        color = product.colors.firstOrNull() ?: com.example.model.ProductColor("Dorado", 0xFFD4AF37)
+                        color = product.colors.firstOrNull() ?: ProductColor("Dorado", 0xFFD4AF37)
                     )
+                },
+                onEditPriceClick = {
+                    productForPriceEdit = product
                 }
             )
         }
     }
+
+    // Diálogos para Asignar / Cambiar Precio
+    slotForPriceEdit?.let { slot ->
+        PriceEditDialog(
+            itemName = slot.title,
+            initialPrice = slot.price,
+            onDismiss = { slotForPriceEdit = null },
+            onSavePrice = { newPrice ->
+                viewModel.updateSlotPrice(slot.id, newPrice)
+            }
+        )
+    }
+
+    productForPriceEdit?.let { prod ->
+        PriceEditDialog(
+            itemName = prod.name,
+            initialPrice = prod.price,
+            onDismiss = { productForPriceEdit = null },
+            onSavePrice = { newPrice ->
+                viewModel.updateProductPrice(prod.id, newPrice)
+            }
+        )
+    }
 }
 
+/**
+ * Tarjeta de Foto Grande para Rebajas y Galería de Usuario
+ */
 @Composable
-private fun RebajasImageSlotCard(
+private fun LargePhotoSlotCard(
     slot: RebajasImageSlot,
     onUploadClick: () -> Unit,
-    onRemoveClick: () -> Unit
+    onRemoveClick: () -> Unit,
+    onEditPriceClick: () -> Unit,
+    onAddToCartClick: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         modifier = Modifier
-            .width(220.dp)
-            .height(180.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .width(280.dp)
+            .wrapContentHeight()
+            .clip(RoundedCornerShape(20.dp))
             .clickable {
                 if (slot.isPlaceholder) {
                     onUploadClick()
@@ -767,18 +890,19 @@ private fun RebajasImageSlotCard(
             .testTag("slot_card_${slot.id}")
     ) {
         if (slot.isPlaceholder) {
-            // Empty / Available slot placeholder
+            // Espacio vacío para agregar foto
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .height(290.dp)
                     .background(Color(0xFF14131D))
                     .border(
                         1.5.dp,
                         AthenaPink.copy(alpha = 0.4f),
-                        RoundedCornerShape(16.dp)
+                        RoundedCornerShape(20.dp)
                     )
-                    .padding(12.dp)
+                    .padding(16.dp)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -787,43 +911,45 @@ private fun RebajasImageSlotCard(
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(46.dp)
+                            .size(54.dp)
                             .clip(CircleShape)
                             .background(AthenaPink.copy(alpha = 0.15f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Agregar Imagen",
+                            contentDescription = "Agregar Foto",
                             tint = AthenaPink,
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(32.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
                         text = slot.title,
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
 
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     Text(
-                        text = slot.subtitle ?: "Toca para agregar imagen",
-                        fontSize = 10.sp,
+                        text = slot.subtitle ?: "Toca para agregar foto",
+                        fontSize = 12.sp,
                         color = AthenaPink,
                         textAlign = TextAlign.Center
                     )
                 }
             }
         } else {
-            // Filled slot with image preview
-            Column(modifier = Modifier.fillMaxSize()) {
+            // Espacio con Foto Grande
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(130.dp)
+                        .height(220.dp)
                         .background(Color(0xFF0F0E16))
                 ) {
                     if (slot.imageUri != null) {
@@ -846,69 +972,146 @@ private fun RebajasImageSlotCard(
                         )
                     }
 
-                    // Delete / Replace Button
+                    // Botón simple de eliminar foto en la esquina superior
                     IconButton(
                         onClick = onRemoveClick,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .padding(4.dp)
-                            .size(28.dp)
+                            .padding(8.dp)
+                            .size(32.dp)
                             .clip(CircleShape)
                             .background(Color.Black.copy(alpha = 0.6f))
                             .testTag("remove_slot_${slot.id}")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Eliminar espacio",
+                            contentDescription = "Eliminar",
                             tint = Color.White,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
 
-                    // Tag
+                    // Etiqueta Rebaja
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(6.dp)
+                            .padding(10.dp)
                             .clip(RoundedCornerShape(6.dp))
                             .background(CrimsonSale)
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            text = "REBAJA",
-                            fontSize = 8.sp,
+                            text = "PRENDA REBAJA",
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.White
                         )
                     }
                 }
 
-                // Title info
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                // Título, precio editable y botón de comprar/agregar al carrito
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = slot.title,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    slot.subtitle?.let {
                         Text(
-                            text = slot.title,
+                            text = it,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
+                            color = Color.White.copy(alpha = 0.7f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        slot.subtitle?.let {
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // LUGAR PARA PRECIO DEBAJO DE LA IMAGEN
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        val displayPrice = slot.price ?: 35.0
+                        Row(verticalAlignment = Alignment.Bottom) {
                             Text(
-                                text = it,
-                                fontSize = 9.sp,
-                                color = Color.White.copy(alpha = 0.7f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                text = "$${String.format(Locale.US, "%.2f", displayPrice)}",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = AthenaGoldDark
+                            )
+                            if (slot.originalPrice != null && slot.originalPrice > displayPrice) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "$${String.format(Locale.US, "%.2f", slot.originalPrice)}",
+                                    fontSize = 12.sp,
+                                    textDecoration = TextDecoration.LineThrough,
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                            }
+                        }
+
+                        // Botón de Asignar / Cambiar Precio
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(AthenaPink.copy(alpha = 0.15f))
+                                .clickable { onEditPriceClick() }
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .testTag("slot_edit_price_${slot.id}")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar Precio",
+                                tint = AthenaPink,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (slot.price != null) "Editar" else "Precio",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = AthenaPink
                             )
                         }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // OPCIÓN DE AGREGAR AL CARRITO PARA COMPRAR
+                    Button(
+                        onClick = onAddToCartClick,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AthenaPink,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                            .testTag("slot_buy_btn_${slot.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingBag,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Agregar al Carrito • Comprar",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }

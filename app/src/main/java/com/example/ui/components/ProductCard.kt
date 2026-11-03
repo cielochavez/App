@@ -2,7 +2,6 @@ package com.example.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,10 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -43,17 +40,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.R
 import com.example.model.Product
 import com.example.model.getDrawableResId
-import com.example.ui.theme.AlabasterCream
-import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
+import com.example.ui.theme.AthenaPink
 import com.example.ui.theme.CrimsonSale
-import com.example.ui.theme.GoldenSun
-import com.example.ui.theme.ObsidianNight
-import com.example.ui.theme.RoseBronze
 import java.util.Locale
+
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 
 @Composable
 fun ProductCard(
@@ -61,30 +58,31 @@ fun ProductCard(
     isFavorite: Boolean,
     onCardClick: () -> Unit,
     onFavoriteClick: () -> Unit,
-    onQuickAddClick: () -> Unit,
+    onQuickAddClick: () -> Unit = {},
+    onEditPriceClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(22.dp))
             .clickable { onCardClick() }
             .testTag("product_card_${product.id}")
     ) {
         Column {
-            // Image Box
+            // Large Photo Container (Grandes fotos, limpias sin botones invasivos)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(210.dp)
+                    .height(320.dp)
                     .background(Color(0xFFEDE8E0))
             ) {
-                // Background image
+                // High-resolution Garment Image
                 Image(
                     painter = painterResource(id = product.getDrawableResId()),
                     contentDescription = product.name,
@@ -92,214 +90,106 @@ fun ProductCard(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Gradient overlay
+                // Soft Bottom Gradient
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    Color.Black.copy(alpha = 0.3f),
+                                    Color.Black.copy(alpha = 0.25f),
                                     Color.Transparent,
-                                    Color.Black.copy(alpha = 0.5f)
+                                    Color.Black.copy(alpha = 0.45f)
                                 )
                             )
                         )
                 )
 
-                // Badges top-left
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(10.dp)
-                ) {
-                    if (product.discountPercent != null) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(CrimsonSale)
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
-                        ) {
-                            Text(
-                                text = "-${product.discountPercent}%",
-                                color = Color.White,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                // Discount or Sale Tag
+                if (product.discountPercent != null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(14.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CrimsonSale)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "-${product.discountPercent}% REBAJA",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.5.sp
+                        )
                     }
-                    if (product.isNew) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(AthenaGold)
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
-                        ) {
-                            Text(
-                                text = "NUEVO",
-                                color = ObsidianNight,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.8.sp
-                            )
-                        }
-                    }
-                    if (product.isLowStock) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(Color(0xFFE65100))
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
-                        ) {
-                            Text(
-                                text = "¡ÚLTIMAS ${product.stock}!",
-                                color = Color.White,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                } else if (product.isNew) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(14.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(AthenaPink)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "NUEVA PRENDA",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp
+                        )
                     }
                 }
 
-                // Favorite button top-right
+                // Simple Wishlist Heart Button
                 IconButton(
                     onClick = onFavoriteClick,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .size(36.dp)
+                        .padding(10.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.35f))
+                        .background(Color.Black.copy(alpha = 0.4f))
                         .testTag("fav_btn_${product.id}")
                 ) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Favorito",
-                        tint = if (isFavorite) RoseBronze else Color.White,
-                        modifier = Modifier.size(20.dp)
+                        tint = if (isFavorite) AthenaPink else Color.White,
+                        modifier = Modifier.size(22.dp)
                     )
                 }
-
-                // Quick Add Floating Button bottom-right
-                IconButton(
-                    onClick = onQuickAddClick,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(10.dp)
-                        .size(38.dp)
-                        .clip(CircleShape)
-                        .background(AthenaGold)
-                        .testTag("quick_add_btn_${product.id}")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AddShoppingCart,
-                        contentDescription = "Agregar al Carrito",
-                        tint = ObsidianNight,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                // SKU tag bottom-left
-                Text(
-                    text = product.sku,
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(10.dp)
-                )
             }
 
-            // Info Section
+            // Simple & Clean Details (Sin botones innecesarios, tipografía elegante y clara)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp)
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
-                // Category & Rating
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = product.category.displayName.uppercase(),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.8.sp,
-                        color = MaterialTheme.colorScheme.primary
+                        text = product.name,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
                     )
 
+                    Spacer(modifier = Modifier.width(10.dp))
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Rating",
-                            tint = GoldenSun,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = String.format(Locale.US, "%.1f", product.rating),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Product Name
-                Text(
-                    text = product.name,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Available Sizes preview
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    product.sizes.take(4).forEach { size ->
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .size(22.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                        ) {
-                            Text(
-                                text = size,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Pricing
-                Row(
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             text = "$${String.format(Locale.US, "%.2f", product.price)}",
-                            fontSize = 16.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = AthenaGoldDark
                         )
@@ -307,18 +197,74 @@ fun ProductCard(
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "$${String.format(Locale.US, "%.2f", product.originalPrice)}",
-                                fontSize = 12.sp,
+                                fontSize = 13.sp,
                                 textDecoration = TextDecoration.LineThrough,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        IconButton(
+                            onClick = onEditPriceClick,
+                            modifier = Modifier
+                                .size(28.dp)
+                                .testTag("edit_price_btn_${product.id}")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar Precio",
+                                tint = AthenaPink,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
                     }
+                }
 
-                    // Stock status
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(
-                        text = if (product.isOutOfStock) "Agotado" else "${product.stock} disp.",
-                        fontSize = 10.sp,
-                        color = if (product.isOutOfStock) CrimsonSale else if (product.isLowStock) Color(0xFFE65100) else MaterialTheme.colorScheme.onSurfaceVariant
+                        text = product.category.displayName,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = AthenaPink
+                    )
+
+                    Text(
+                        text = if (product.isOutOfStock) "Agotado" else "Disponible",
+                        fontSize = 11.sp,
+                        color = if (product.isOutOfStock) CrimsonSale else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // BOTÓN AGREGAR AL CARRITO PARA COMPRAR
+                Button(
+                    onClick = onQuickAddClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AthenaPink,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .testTag("add_to_cart_btn_${product.id}")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingBag,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Agregar al Carrito • Comprar",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }

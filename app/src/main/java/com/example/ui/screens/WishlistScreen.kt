@@ -49,6 +49,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.ui.components.PriceEditDialog
 import com.example.R
 import com.example.data.local.WishlistItem
 import com.example.model.Product
@@ -73,6 +78,7 @@ fun WishlistScreen(
 ) {
     val wishlistItems by viewModel.wishlistItems.collectAsState()
     val allProducts by viewModel.products.collectAsState()
+    var itemForPriceEdit by remember { mutableStateOf<WishlistItem?>(null) }
 
     val totalValue = wishlistItems.sumOf { it.price }
 
@@ -271,6 +277,9 @@ fun WishlistScreen(
                         )
                     }
                 },
+                onEditPrice = {
+                    itemForPriceEdit = item
+                },
                 onRemove = {
                     viewModel.removeFromWishlist(item.productId)
                 }
@@ -282,6 +291,18 @@ fun WishlistScreen(
             Spacer(modifier = Modifier.height(80.dp))
         }
     }
+
+    // Diálogo para cambiar o asignar precio en Deseos
+    itemForPriceEdit?.let { wishItem ->
+        PriceEditDialog(
+            itemName = wishItem.name,
+            initialPrice = wishItem.price,
+            onDismiss = { itemForPriceEdit = null },
+            onSavePrice = { newPrice ->
+                viewModel.updateProductPrice(wishItem.productId, newPrice)
+            }
+        )
+    }
 }
 
 @Composable
@@ -290,6 +311,7 @@ private fun WishlistItemRow(
     matchingProduct: Product?,
     onItemClick: () -> Unit,
     onAddToCart: () -> Unit,
+    onEditPrice: () -> Unit,
     onRemove: () -> Unit
 ) {
     Card(
@@ -373,7 +395,7 @@ private fun WishlistItemRow(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                Row(verticalAlignment = Alignment.Bottom) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "$${String.format(Locale.US, "%.2f", item.price)}",
                         fontSize = 16.sp,
@@ -388,6 +410,21 @@ private fun WishlistItemRow(
                             fontSize = 12.sp,
                             textDecoration = TextDecoration.LineThrough,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+                    IconButton(
+                        onClick = onEditPrice,
+                        modifier = Modifier
+                            .size(26.dp)
+                            .testTag("wishlist_edit_price_${item.productId}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar Precio",
+                            tint = AthenaPink,
+                            modifier = Modifier.size(14.dp)
                         )
                     }
                 }

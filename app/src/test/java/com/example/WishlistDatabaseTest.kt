@@ -103,8 +103,7 @@ class WishlistDatabaseTest {
             description = "Campera acolchada con interior en borrego térmico.",
             fabric = "Algodón & Piel Sintética",
             stock = 4,
-            sku = "ATH-REB-003",
-            discountPercent = 30
+            sku = "ATH-REB-003"
         )
 
         repository.saveToWishlist(product)

@@ -11,5 +11,8 @@ data class RebajasImageSlot(
     val subtitle: String? = null,
     val imageUri: String? = null,
     val drawableResId: Int? = null,
-    val isPlaceholder: Boolean = false
+    val isPlaceholder: Boolean = false,
+    val price: Double? = null,
+    val originalPrice: Double? = null,
+    val associatedProductId: String? = null
 )

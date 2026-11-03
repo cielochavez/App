@@ -79,6 +79,66 @@ object AthenaSampleData {
             imageResName = "prod_conjunto_marron"
         ),
         Product(
+            id = "set-malibu-celeste",
+            name = "Set Malibú Celeste",
+            category = ProductCategory.SETS,
+            price = 68.0,
+            originalPrice = 95.0,
+            sizes = listOf("XS", "S", "M", "L"),
+            colors = listOf(
+                ProductColor("Celeste Malibú", 0xFFAEC6CF)
+            ),
+            description = "Conjunto exclusivo Set Malibú de dos piezas. Top halter con escote pronunciado, cierre frontal regulable y pantalón flare tiro medio con pretina ancha doblada estilo boho chic.",
+            fabric = "Tejido modal elastizado de alta densidad con caída fluida",
+            stock = 8,
+            sku = "ATH-MAL-CEL",
+            rating = 4.98f,
+            reviewsCount = 54,
+            isNew = true,
+            isTrending = true,
+            imageResName = "prod_set_malibu_celeste"
+        ),
+        Product(
+            id = "set-malibu-rosa",
+            name = "Set Malibú Rosa Pastel",
+            category = ProductCategory.SETS,
+            price = 68.0,
+            originalPrice = 95.0,
+            sizes = listOf("XS", "S", "M", "L"),
+            colors = listOf(
+                ProductColor("Rosa Pastel", 0xFFF4C2C2)
+            ),
+            description = "Conjunto Set Malibú en tono rosa dulce. Top halter entallado con cierre metálico frontal y pantalón oxford con pretina elastizada que resalta y estiliza la figura.",
+            fabric = "Modal stretch transpirable y suave al tacto",
+            stock = 6,
+            sku = "ATH-MAL-ROSA",
+            rating = 4.95f,
+            reviewsCount = 42,
+            isNew = true,
+            isTrending = true,
+            imageResName = "prod_set_malibu_rosa"
+        ),
+        Product(
+            id = "set-malibu-marron",
+            name = "Set Malibú Chocolate",
+            category = ProductCategory.SETS,
+            price = 68.0,
+            originalPrice = 95.0,
+            sizes = listOf("XS", "S", "M", "L"),
+            colors = listOf(
+                ProductColor("Marrón Chocolate", 0xFF3E2723)
+            ),
+            description = "Conjunto Set Malibú en tono chocolate profundo. Top escote halter con cremallera frontal y pantalón acampanado flare con cintura doblada super favorecedora.",
+            fabric = "Modal stretch acanalado premium",
+            stock = 9,
+            sku = "ATH-MAL-BRW",
+            rating = 4.97f,
+            reviewsCount = 49,
+            isNew = true,
+            isTrending = true,
+            imageResName = "prod_set_malibu_marron"
+        ),
+        Product(
             id = "reb-campera-4",
             name = "Campera con Piel Térmica",
             category = ProductCategory.TOPS,
@@ -165,6 +225,69 @@ object AthenaSampleData {
             imageResName = "prod_pantalon_strass"
         ),
         Product(
+            id = "adi-campera-jean-1",
+            name = "Campera de Jean Adidas 3 Tiras",
+            category = ProductCategory.ADIDAS,
+            price = 98.0,
+            originalPrice = 135.0,
+            sizes = listOf("XS", "S", "M", "L", "XL"),
+            colors = listOf(
+                ProductColor("Denim Lavado Vintage", 0xFF4A6B8C)
+            ),
+            description = "Campera bomber de jean denim con las clásicas 3 tiras celestes en hombros y brazos. Detalle de logo Trefoil bordado en el pecho, cremallera completa y pretina elástica.",
+            fabric = "100% Denim de algodón lavado premium",
+            stock = 7,
+            sku = "ATH-ADI-DENIM-01",
+            rating = 4.98f,
+            reviewsCount = 64,
+            isNew = true,
+            isTrending = true,
+            imageResName = "prod_campera_jean_adidas"
+        ),
+        Product(
+            id = "adi-conjunto-3piezas-2",
+            name = "Conjunto 3 Piezas Adidas Trefoil",
+            category = ProductCategory.ADIDAS,
+            price = 89.0,
+            originalPrice = 125.0,
+            sizes = listOf("S", "M", "L"),
+            colors = listOf(
+                ProductColor("Negro Noche", 0xFF141416),
+                ProductColor("Bordeaux Vino", 0xFF6B1D2F),
+                ProductColor("Beige Avena", 0xFFDFD7C7)
+            ),
+            description = "Conjunto deportivo de tres piezas de alta tendencia: campera crop con capucha y cierre, top bandeau elastizado y short con cordón ajustable. All-over mini logos Trefoil.",
+            fabric = "Algodón peinado con elastano y felpa suave",
+            stock = 10,
+            sku = "ATH-ADI-SET-02",
+            rating = 4.96f,
+            reviewsCount = 53,
+            isNew = true,
+            isTrending = true,
+            imageResName = "prod_conjunto_3piezas_adidas"
+        ),
+        Product(
+            id = "adi-conjunto-3",
+            name = "Pantalón Jogger Adidas 3 Tiras Wide",
+            category = ProductCategory.ADIDAS,
+            price = 62.0,
+            originalPrice = 85.0,
+            sizes = listOf("XS", "S", "M", "L"),
+            colors = listOf(
+                ProductColor("Negro Profundo", 0xFF121214),
+                ProductColor("Gris Melange", 0xFF7D7D82)
+            ),
+            description = "Pantalón deportivo wide leg con cintura ajustable y caída relajada. Comodidad absoluta para look streetwear y entrenamiento.",
+            fabric = "Algodón frisado y felpa francesa suave",
+            stock = 12,
+            sku = "ATH-ADI-003",
+            rating = 4.90f,
+            reviewsCount = 37,
+            isNew = true,
+            isTrending = false,
+            imageResName = "prod_jogging_wide"
+        ),
+        Product(
             id = "reb-remera-8",
             name = "Remera Crop Encaje Escote V",
             category = ProductCategory.TOPS,
@@ -189,14 +312,14 @@ object AthenaSampleData {
             id = "reb-buzo-9",
             name = "Buzo Los Angeles 91 Oversize",
             category = ProductCategory.TOPS,
-            price = 49.0,
-            originalPrice = 70.0,
+            price = 35.0,
+            originalPrice = 55.0,
             sizes = listOf("S", "M", "L", "XL"),
             colors = listOf(
                 ProductColor("Negro Vintage", 0xFF1E1E22),
                 ProductColor("Gris Melange", 0xFF8A8A8E)
             ),
-            description = "Buzo cuello redondo de silueta oversize con estampa universitaria 'LOS ANGELES 91' en felpa suave y puños acanalados.",
+            description = "Buzo cuello redondo de silueta oversize con estampa universitaria 'LOS ANGELES 91' en felpa suave y puños acanalados. Precio promocional en Rebajas: $13.000.",
             fabric = "Algodón con frisa interior abrigada",
             stock = 8,
             sku = "ATH-REB-009",

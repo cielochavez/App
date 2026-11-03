@@ -16,23 +16,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Checkroom
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Inventory2
-import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
+import com.example.model.ProductCategory
+import com.example.ui.theme.CrimsonSale
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -138,8 +143,11 @@ fun AthenaApp(
             }
         },
         bottomBar = {
-            // Show bottom bar unless in full product detail or fullscreen portada
-            if (currentScreen != AthenaScreen.PRODUCT_DETAIL && currentScreen != AthenaScreen.PORTADA) {
+            // Show bottom bar with simplified menu (Inicio, Rebajas, Adidas, Conjuntos, Deseos)
+            if (currentScreen != AthenaScreen.PRODUCT_DETAIL) {
+                val selectedCategory by viewModel.selectedCategory.collectAsState()
+                val isCatalog = currentScreen == AthenaScreen.CATALOG
+
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
@@ -151,10 +159,10 @@ fun AthenaApp(
                         icon = {
                             Icon(
                                 imageVector = if (currentScreen == AthenaScreen.PORTADA) Icons.Default.Home else Icons.Outlined.Home,
-                                contentDescription = "Portada"
+                                contentDescription = "Inicio"
                             )
                         },
-                        label = { Text("Portada", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
+                        label = { Text("Inicio", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = ObsidianNight,
                             selectedTextColor = AthenaPink,
@@ -163,22 +171,61 @@ fun AthenaApp(
                         modifier = Modifier.testTag("nav_item_portada")
                     )
 
+                    val isRebajasSelected = isCatalog && selectedCategory == ProductCategory.REBAJAS
                     NavigationBarItem(
-                        selected = currentScreen == AthenaScreen.CATALOG,
-                        onClick = { viewModel.navigateTo(AthenaScreen.CATALOG) },
+                        selected = isRebajasSelected,
+                        onClick = { viewModel.openMenuSection(ProductCategory.REBAJAS) },
                         icon = {
                             Icon(
-                                imageVector = if (currentScreen == AthenaScreen.CATALOG) Icons.Default.Storefront else Icons.Outlined.Storefront,
-                                contentDescription = "Catálogo"
+                                imageVector = if (isRebajasSelected) Icons.Default.LocalOffer else Icons.Outlined.LocalOffer,
+                                contentDescription = "Rebajas"
                             )
                         },
-                        label = { Text("Catálogo", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
+                        label = { Text("Rebajas", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color.White,
+                            selectedTextColor = CrimsonSale,
+                            indicatorColor = CrimsonSale
+                        ),
+                        modifier = Modifier.testTag("nav_item_rebajas")
+                    )
+
+                    val isAdidasSelected = isCatalog && selectedCategory == ProductCategory.ADIDAS
+                    NavigationBarItem(
+                        selected = isAdidasSelected,
+                        onClick = { viewModel.openMenuSection(ProductCategory.ADIDAS) },
+                        icon = {
+                            Icon(
+                                imageVector = if (isAdidasSelected) Icons.Default.Checkroom else Icons.Outlined.Checkroom,
+                                contentDescription = "Adidas"
+                            )
+                        },
+                        label = { Text("Adidas", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = ObsidianNight,
-                            selectedTextColor = AthenaGoldDark,
-                            indicatorColor = AthenaGold
+                            selectedTextColor = AthenaPink,
+                            indicatorColor = AthenaPink
                         ),
-                        modifier = Modifier.testTag("nav_item_catalog")
+                        modifier = Modifier.testTag("nav_item_adidas")
+                    )
+
+                    val isConjuntosSelected = isCatalog && selectedCategory == ProductCategory.SETS
+                    NavigationBarItem(
+                        selected = isConjuntosSelected,
+                        onClick = { viewModel.openMenuSection(ProductCategory.SETS) },
+                        icon = {
+                            Icon(
+                                imageVector = if (isConjuntosSelected) Icons.Default.AutoAwesome else Icons.Outlined.AutoAwesome,
+                                contentDescription = "Conjuntos"
+                            )
+                        },
+                        label = { Text("Conjuntos", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = ObsidianNight,
+                            selectedTextColor = AthenaPink,
+                            indicatorColor = AthenaPink
+                        ),
+                        modifier = Modifier.testTag("nav_item_conjuntos")
                     )
 
                     NavigationBarItem(
@@ -200,59 +247,13 @@ fun AthenaApp(
                                 )
                             }
                         },
-                        label = { Text("Deseos", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
+                        label = { Text("Deseos", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = ObsidianNight,
                             selectedTextColor = AthenaPink,
                             indicatorColor = AthenaPink
                         ),
                         modifier = Modifier.testTag("nav_item_wishlist")
-                    )
-
-                    NavigationBarItem(
-                        selected = currentScreen == AthenaScreen.LIVE_TRACKING,
-                        onClick = { viewModel.navigateTo(AthenaScreen.LIVE_TRACKING) },
-                        icon = {
-                            Icon(
-                                imageVector = if (currentScreen == AthenaScreen.LIVE_TRACKING) Icons.Default.LocalShipping else Icons.Outlined.LocalShipping,
-                                contentDescription = "Envíos"
-                            )
-                        },
-                        label = { Text("Envíos", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = ObsidianNight,
-                            selectedTextColor = AthenaGoldDark,
-                            indicatorColor = AthenaGold
-                        ),
-                        modifier = Modifier.testTag("nav_item_tracking")
-                    )
-
-                    NavigationBarItem(
-                        selected = currentScreen == AthenaScreen.CART_CHECKOUT,
-                        onClick = { viewModel.navigateTo(AthenaScreen.CART_CHECKOUT) },
-                        icon = {
-                            BadgedBox(
-                                badge = {
-                                    if (cartCount > 0) {
-                                        Badge(containerColor = AthenaPink, contentColor = ObsidianNight) {
-                                            Text(cartCount.toString(), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = if (currentScreen == AthenaScreen.CART_CHECKOUT) Icons.Default.ShoppingBag else Icons.Outlined.ShoppingBag,
-                                    contentDescription = "Bolsa"
-                                )
-                            }
-                        },
-                        label = { Text("Bolsa", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = ObsidianNight,
-                            selectedTextColor = AthenaGoldDark,
-                            indicatorColor = AthenaGold
-                        ),
-                        modifier = Modifier.testTag("nav_item_cart")
                     )
                 }
             }

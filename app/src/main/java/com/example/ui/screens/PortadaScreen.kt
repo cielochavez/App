@@ -63,6 +63,19 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import com.example.model.Product
+import com.example.model.ProductColor
+import com.example.model.getDrawableResId
+import com.example.ui.components.PriceEditDialog
+import com.example.ui.theme.AthenaGoldDark
+import java.util.Locale
 import com.example.R
 import com.example.model.ProductCategory
 import com.example.ui.theme.AthenaPink
@@ -79,6 +92,8 @@ fun PortadaScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val products by viewModel.products.collectAsState()
+    var productForPriceEdit by remember { mutableStateOf<Product?>(null) }
 
     // Subtle ambient scale pulse for high-fashion appeal
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -299,56 +314,292 @@ fun PortadaScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // QUICK CATEGORY PILLS (Rebajas, Conjuntos, Colección Olimpo, Vestidos)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            // MENÚ PRINCIPAL: REBAJAS • ADIDAS • CONJUNTOS
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color(0xFF14121E))
+                    .border(1.2.dp, AthenaPink.copy(alpha = 0.5f), RoundedCornerShape(22.dp))
+                    .padding(16.dp)
+                    .testTag("portada_main_menu_card")
             ) {
-                QuickActionChip(
-                    title = "🔥 Rebajas Exclusivas",
-                    containerColor = CrimsonSale,
-                    contentColor = Color.White,
-                    onClick = {
-                        viewModel.isOnlySaleFilter.value = true
-                        viewModel.selectedCategory.value = ProductCategory.REBAJAS
-                        viewModel.navigateTo(AthenaScreen.CATALOG)
-                    }
+                Text(
+                    text = "MENÚ PRINCIPAL",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.5.sp,
+                    color = AthenaPink
                 )
-                QuickActionChip(
-                    title = "✨ Conjuntos & Trajes",
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF1E1E1E),
-                    onClick = {
-                        viewModel.isOnlySaleFilter.value = false
-                        viewModel.selectedCategory.value = ProductCategory.SETS
-                        viewModel.navigateTo(AthenaScreen.CATALOG)
-                    }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Colecciones directas:",
+                    fontSize = 13.sp,
+                    color = Color.White.copy(alpha = 0.8f)
                 )
-                QuickActionChip(
-                    title = "🏛️ Colección Olimpo",
-                    containerColor = Color(0xFF14121E),
-                    contentColor = AthenaPink,
-                    onClick = {
-                        viewModel.isOnlySaleFilter.value = false
-                        viewModel.selectedCategory.value = ProductCategory.OLYMPUS
-                        viewModel.navigateTo(AthenaScreen.CATALOG)
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // 1. REBAJAS
+                    Button(
+                        onClick = { viewModel.openMenuSection(ProductCategory.REBAJAS) },
+                        colors = ButtonDefaults.buttonColors(containerColor = CrimsonSale, contentColor = Color.White),
+                        shape = RoundedCornerShape(14.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .testTag("menu_btn_rebajas")
+                    ) {
+                        Text(
+                            text = "🔥 Rebajas",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
-                )
-                QuickActionChip(
-                    title = "👗 Vestidos de Noche",
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF1E1E1E),
-                    onClick = {
-                        viewModel.isOnlySaleFilter.value = false
-                        viewModel.selectedCategory.value = ProductCategory.DRESSES
-                        viewModel.navigateTo(AthenaScreen.CATALOG)
+
+                    // 2. ADIDAS
+                    Button(
+                        onClick = { viewModel.openMenuSection(ProductCategory.ADIDAS) },
+                        colors = ButtonDefaults.buttonColors(containerColor = AthenaPink, contentColor = Color.Black),
+                        shape = RoundedCornerShape(14.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .testTag("menu_btn_adidas")
+                    ) {
+                        Text(
+                            text = "👟 Adidas",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Black
+                        )
                     }
-                )
+
+                    // 3. CONJUNTOS
+                    Button(
+                        onClick = { viewModel.openMenuSection(ProductCategory.SETS) },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFF14121E)),
+                        shape = RoundedCornerShape(14.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .testTag("menu_btn_conjuntos")
+                    ) {
+                        Text(
+                            text = "✨ Conjuntos",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // PRENDAS DESTACADAS CON PRECIO Y COMPRA DIRECTA AL CARRITO
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color(0xFF14121E))
+                    .border(1.2.dp, AthenaPink.copy(alpha = 0.5f), RoundedCornerShape(22.dp))
+                    .padding(16.dp)
+                    .testTag("portada_featured_products_card")
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column {
+                        Text(
+                            text = "PRENDAS DESTACADAS",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.5.sp,
+                            color = AthenaPink
+                        )
+                        Text(
+                            text = "Precios y compra directa al carrito",
+                            fontSize = 11.sp,
+                            color = Color.White.copy(alpha = 0.75f)
+                        )
+                    }
+
+                    Text(
+                        text = "Ver Catálogo →",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AthenaPink,
+                        modifier = Modifier
+                            .clickable {
+                                viewModel.selectedCategory.value = ProductCategory.ALL
+                                viewModel.isOnlySaleFilter.value = false
+                                viewModel.navigateTo(AthenaScreen.CATALOG)
+                            }
+                            .padding(4.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    products.take(6).forEach { product ->
+                        Card(
+                            shape = RoundedCornerShape(18.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+                            modifier = Modifier
+                                .width(220.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .testTag("portada_item_${product.id}")
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(170.dp)
+                                        .background(Color(0xFFEDE8E0))
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = product.getDrawableResId()),
+                                        contentDescription = product.name,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    if (product.discountPercent != null) {
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopStart)
+                                                .padding(8.dp)
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(CrimsonSale)
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                text = "-${product.discountPercent}%",
+                                                color = Color.White,
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.ExtraBold
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp)
+                                ) {
+                                    Text(
+                                        text = product.name,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    // LUGAR PARA PRECIO DEBAJO DE CADA IMAGEN
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(verticalAlignment = Alignment.Bottom) {
+                                            Text(
+                                                text = "$${String.format(Locale.US, "%.2f", product.price)}",
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                color = AthenaGoldDark
+                                            )
+                                            if (product.originalPrice != null) {
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text(
+                                                    text = "$${String.format(Locale.US, "%.2f", product.originalPrice)}",
+                                                    fontSize = 11.sp,
+                                                    textDecoration = TextDecoration.LineThrough,
+                                                    color = Color.White.copy(alpha = 0.5f)
+                                                )
+                                            }
+                                        }
+
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(AthenaPink.copy(alpha = 0.15f))
+                                                .clickable { productForPriceEdit = product }
+                                                .padding(horizontal = 6.dp, vertical = 3.dp)
+                                                .testTag("portada_edit_price_${product.id}")
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "Editar Precio",
+                                                tint = AthenaPink,
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(3.dp))
+                                            Text(
+                                                text = "Precio",
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = AthenaPink
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // OPCIÓN DE AGREGAR AL CARRITO PARA COMPRAR
+                                    Button(
+                                        onClick = {
+                                            viewModel.addToCart(
+                                                product = product,
+                                                size = product.sizes.firstOrNull() ?: "M",
+                                                color = product.colors.firstOrNull() ?: ProductColor("Dorado", 0xFFD4AF37)
+                                            )
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = AthenaPink,
+                                            contentColor = Color.White
+                                        ),
+                                        shape = RoundedCornerShape(10.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(36.dp)
+                                            .testTag("portada_add_cart_${product.id}")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.ShoppingBag,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "Comprar • Carrito",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             // MAIN CALL TO ACTION: ENTRAR A LA TIENDA
             Button(
@@ -438,6 +689,18 @@ fun PortadaScreen(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // Diálogo para Asignar / Cambiar Precio desde la Portada
+        productForPriceEdit?.let { prod ->
+            PriceEditDialog(
+                itemName = prod.name,
+                initialPrice = prod.price,
+                onDismiss = { productForPriceEdit = null },
+                onSavePrice = { newPrice ->
+                    viewModel.updateProductPrice(prod.id, newPrice)
+                }
+            )
         }
     }
 }

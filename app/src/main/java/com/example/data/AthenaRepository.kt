@@ -324,6 +324,16 @@ class AthenaRepository(
         }
     }
 
+    fun updateProductPrice(productId: String, newPrice: Double) {
+        _products.update { currentProducts ->
+            currentProducts.map { prod ->
+                if (prod.id == productId) {
+                    prod.copy(price = newPrice.coerceAtLeast(0.0))
+                } else prod
+            }
+        }
+    }
+
     fun toggleProductActive(productId: String) {
         _products.update { currentProducts ->
             currentProducts.map { prod ->

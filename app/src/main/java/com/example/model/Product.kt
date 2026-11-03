@@ -6,6 +6,7 @@ enum class ProductCategory(val displayName: String) {
     OLYMPUS("Colección Olimpo"),
     DRESSES("Vestidos de Gala"),
     SETS("Conjuntos & Trajes"),
+    ADIDAS("👟 Adidas"),
     TOPS("Blusas & Sedas"),
     ACCESSORIES("Calzado & Accesorios")
 }
@@ -54,16 +55,21 @@ data class Product(
 
 fun Product.getDrawableResId(): Int {
     return when (imageResName) {
-        "prod_corset_encaje" -> com.example.R.drawable.prod_corset_encaje
-        "prod_corset_leopardo" -> com.example.R.drawable.prod_corset_leopardo
-        "prod_conjunto_marron" -> com.example.R.drawable.prod_conjunto_marron
-        "prod_campera_piel" -> com.example.R.drawable.prod_campera_piel
+        "prod_corset_encaje", "rebajas_corset_encaje_trio" -> com.example.R.drawable.rebajas_corset_encaje_trio
+        "prod_corset_leopardo", "rebajas_corset_leopardo_negro" -> com.example.R.drawable.rebajas_corset_leopardo_negro
+        "prod_conjunto_marron", "rebajas_conjunto_canale_duo" -> com.example.R.drawable.rebajas_conjunto_canale_duo
+        "prod_campera_piel", "rebajas_campera_piel_duo" -> com.example.R.drawable.rebajas_campera_piel_duo
+        "prod_buzo_losangeles", "rebajas_buzo_losangeles_91" -> com.example.R.drawable.rebajas_buzo_losangeles_91
         "prod_chaleco_corderito" -> com.example.R.drawable.prod_chaleco_corderito
         "prod_jogging_wide" -> com.example.R.drawable.prod_jogging_wide
         "prod_pantalon_strass" -> com.example.R.drawable.prod_pantalon_strass
         "prod_remera_crop" -> com.example.R.drawable.prod_remera_crop
-        "prod_buzo_losangeles" -> com.example.R.drawable.prod_buzo_losangeles
         "prod_conjunto_violeta" -> com.example.R.drawable.prod_conjunto_violeta
+        "prod_campera_jean_adidas" -> com.example.R.drawable.prod_campera_jean_adidas
+        "prod_conjunto_3piezas_adidas" -> com.example.R.drawable.prod_conjunto_3piezas_adidas
+        "prod_set_malibu_celeste" -> com.example.R.drawable.prod_set_malibu_celeste
+        "prod_set_malibu_rosa" -> com.example.R.drawable.prod_set_malibu_rosa
+        "prod_set_malibu_marron" -> com.example.R.drawable.prod_set_malibu_marron
         "banner_portada_rebajas" -> com.example.R.drawable.banner_portada_rebajas
         "athena_cover" -> com.example.R.drawable.athena_cover
         else -> com.example.R.drawable.athena_cover
