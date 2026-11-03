@@ -75,3 +75,61 @@ fun Product.getDrawableResId(): Int {
         else -> com.example.R.drawable.athena_cover
     }
 }
+
+fun Product.getGalleryDrawables(): List<Int> {
+    val main = getDrawableResId()
+    val list = when (id) {
+        "reb-corset-1" -> listOf(
+            com.example.R.drawable.rebajas_corset_encaje_trio,
+            com.example.R.drawable.rebajas_corset_leopardo_negro,
+            com.example.R.drawable.banner_portada_rebajas
+        )
+        "reb-corset-2" -> listOf(
+            com.example.R.drawable.rebajas_corset_leopardo_negro,
+            com.example.R.drawable.rebajas_corset_encaje_trio,
+            com.example.R.drawable.banner_portada_rebajas
+        )
+        "reb-campera-4" -> listOf(
+            com.example.R.drawable.rebajas_campera_piel_duo,
+            com.example.R.drawable.prod_chaleco_corderito,
+            com.example.R.drawable.banner_portada_rebajas
+        )
+        "reb-conjunto-3" -> listOf(
+            com.example.R.drawable.rebajas_conjunto_canale_duo,
+            com.example.R.drawable.prod_set_malibu_marron,
+            com.example.R.drawable.banner_portada_rebajas
+        )
+        "reb-buzo-9" -> listOf(
+            com.example.R.drawable.rebajas_buzo_losangeles_91,
+            com.example.R.drawable.prod_jogging_wide,
+            com.example.R.drawable.banner_portada_rebajas
+        )
+        "adi-campera-jean-1" -> listOf(
+            com.example.R.drawable.prod_campera_jean_adidas,
+            com.example.R.drawable.prod_conjunto_3piezas_adidas,
+            com.example.R.drawable.banner_portada_rebajas
+        )
+        "adi-conjunto-3p-2" -> listOf(
+            com.example.R.drawable.prod_conjunto_3piezas_adidas,
+            com.example.R.drawable.prod_campera_jean_adidas,
+            com.example.R.drawable.banner_portada_rebajas
+        )
+        "set-malibu-celeste" -> listOf(
+            com.example.R.drawable.prod_set_malibu_celeste,
+            com.example.R.drawable.prod_set_malibu_rosa,
+            com.example.R.drawable.prod_set_malibu_marron
+        )
+        "set-malibu-rosa" -> listOf(
+            com.example.R.drawable.prod_set_malibu_rosa,
+            com.example.R.drawable.prod_set_malibu_celeste,
+            com.example.R.drawable.prod_set_malibu_marron
+        )
+        "set-malibu-marron" -> listOf(
+            com.example.R.drawable.prod_set_malibu_marron,
+            com.example.R.drawable.prod_set_malibu_rosa,
+            com.example.R.drawable.prod_set_malibu_celeste
+        )
+        else -> listOf(main, com.example.R.drawable.banner_portada_rebajas, com.example.R.drawable.athena_cover)
+    }
+    return list.distinct()
+}

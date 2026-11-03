@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,11 +28,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -106,6 +111,11 @@ fun CatalogScreen(
     // Dialog states for adding/editing prices
     var slotForPriceEdit by remember { mutableStateOf<RebajasImageSlot?>(null) }
     var productForPriceEdit by remember { mutableStateOf<Product?>(null) }
+
+    val coroutineScope = rememberCoroutineScope()
+    val rebajasScrollState = rememberScrollState()
+    val adidasScrollState = rememberScrollState()
+    val conjuntosScrollState = rememberScrollState()
 
     // Android zero-permission Photo Picker
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -329,103 +339,209 @@ fun CatalogScreen(
                         .fillMaxWidth()
                         .testTag("rebajas_image_spaces_section")
                 ) {
-                    Text(
-                        text = "ESPACIOS PARA AGREGAR FOTOS",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.sp,
-                        color = AthenaPink
-                    )
-                    Text(
-                        text = "Sube fotos de prendas de rebajas desde tu galería.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Header con flechas para correr las fotos
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column {
+                            Text(
+                                text = "ESPACIOS PARA AGREGAR FOTOS",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.sp,
+                                color = AthenaPink
+                            )
+                            Text(
+                                text = "Sube fotos de prendas de rebajas desde tu galería.",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        // Controles de flechas para correr las fotos
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        rebajasScrollState.animateScrollBy(-600f)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF222030))
+                                    .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                    .testTag("rebajas_header_arrow_prev")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Correr fotos izquierda",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        rebajasScrollState.animateScrollBy(600f)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF222030))
+                                    .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                    .testTag("rebajas_header_arrow_next")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = "Correr fotos derecha",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                    ) {
-                        // Tarjeta + Subir Foto de Prenda
-                        Card(
-                            shape = RoundedCornerShape(20.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+                    // Carousel con flechas laterales superpuestas
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
                             modifier = Modifier
-                                .width(260.dp)
-                                .height(290.dp)
-                                .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
-                                .clickable {
-                                    activeSlotType = "rebajas"
-                                    activeTargetSlotId = null
-                                    photoPickerLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    )
-                                }
-                                .testTag("slot_add_new_picker_card")
+                                .fillMaxWidth()
+                                .horizontalScroll(rebajasScrollState)
                         ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
+                            // Tarjeta + Subir Foto de Prenda
+                            Card(
+                                shape = RoundedCornerShape(20.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(18.dp)
+                                    .width(260.dp)
+                                    .height(290.dp)
+                                    .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
+                                    .clickable {
+                                        activeSlotType = "rebajas"
+                                        activeTargetSlotId = null
+                                        photoPickerLauncher.launch(
+                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        )
+                                    }
+                                    .testTag("slot_add_new_picker_card")
                             ) {
-                                Box(
-                                    contentAlignment = Alignment.Center,
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
                                     modifier = Modifier
-                                        .size(64.dp)
-                                        .clip(CircleShape)
-                                        .background(AthenaPink.copy(alpha = 0.2f))
+                                        .fillMaxSize()
+                                        .padding(18.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.AddPhotoAlternate,
-                                        contentDescription = "Subir foto",
-                                        tint = AthenaPink,
-                                        modifier = Modifier.size(36.dp)
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .size(64.dp)
+                                            .clip(CircleShape)
+                                            .background(AthenaPink.copy(alpha = 0.2f))
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.AddPhotoAlternate,
+                                            contentDescription = "Subir foto",
+                                            tint = AthenaPink,
+                                            modifier = Modifier.size(36.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    Text(
+                                        text = "+ Subir Foto de Prenda",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = AthenaPink,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "Elige de tu galería",
+                                        fontSize = 12.sp,
+                                        color = Color.White.copy(alpha = 0.75f),
+                                        textAlign = TextAlign.Center
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(14.dp))
-                                Text(
-                                    text = "+ Subir Foto de Prenda",
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = AthenaPink,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = "Elige de tu galería",
-                                    fontSize = 12.sp,
-                                    color = Color.White.copy(alpha = 0.75f),
-                                    textAlign = TextAlign.Center
+                            }
+
+                            // Espacios para fotos de Rebajas
+                            rebajasSlots.forEach { slot ->
+                                LargePhotoSlotCard(
+                                    slot = slot,
+                                    onUploadClick = {
+                                        activeSlotType = "rebajas"
+                                        activeTargetSlotId = slot.id
+                                        photoPickerLauncher.launch(
+                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        )
+                                    },
+                                    onRemoveClick = {
+                                        viewModel.removeRebajasSlot(slot.id)
+                                    },
+                                    onEditPriceClick = {
+                                        slotForPriceEdit = slot
+                                    },
+                                    onAddToCartClick = {
+                                        viewModel.addSlotToCart(slot)
+                                    }
                                 )
                             }
                         }
 
-                        // Espacios para fotos de Rebajas
-                        rebajasSlots.forEach { slot ->
-                            LargePhotoSlotCard(
-                                slot = slot,
-                                onUploadClick = {
-                                    activeSlotType = "rebajas"
-                                    activeTargetSlotId = slot.id
-                                    photoPickerLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    )
-                                },
-                                onRemoveClick = {
-                                    viewModel.removeRebajasSlot(slot.id)
-                                },
-                                onEditPriceClick = {
-                                    slotForPriceEdit = slot
-                                },
-                                onAddToCartClick = {
-                                    viewModel.addSlotToCart(slot)
+                        // Flechas flotantes en los bordes para correr fotos fácilmente
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    rebajasScrollState.animateScrollBy(-600f)
                                 }
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .padding(start = 2.dp)
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                .border(1.5.dp, AthenaPink, CircleShape)
+                                .testTag("rebajas_side_arrow_prev")
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Correr foto anterior",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    rebajasScrollState.animateScrollBy(600f)
+                                }
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = 2.dp)
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                .border(1.5.dp, AthenaPink, CircleShape)
+                                .testTag("rebajas_side_arrow_next")
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Correr foto siguiente",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
@@ -486,104 +602,207 @@ fun CatalogScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // ESPACIOS PARA AGREGAR IMÁGENES ADIDAS
-                        Text(
-                            text = "ESPACIOS PARA IMÁGENES ADIDAS",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.sp,
-                            color = AthenaPink
-                        )
-                        Text(
-                            text = "Toca cualquier espacio para subir fotos de prendas Adidas desde tu galería.",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        // Header con flechas para correr fotos Adidas
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column {
+                                Text(
+                                    text = "ESPACIOS PARA IMÁGENES ADIDAS",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 1.sp,
+                                    color = AthenaPink
+                                )
+                                Text(
+                                    text = "Toca cualquier espacio para subir fotos de prendas Adidas.",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            adidasScrollState.animateScrollBy(-600f)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF222030))
+                                        .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                        .testTag("adidas_header_arrow_prev")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Correr fotos izquierda",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            adidasScrollState.animateScrollBy(600f)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF222030))
+                                        .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                        .testTag("adidas_header_arrow_next")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = "Correr fotos derecha",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState())
-                        ) {
-                            // Tarjeta + Subir Foto Adidas
-                            Card(
-                                shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 modifier = Modifier
-                                    .width(260.dp)
-                                    .height(290.dp)
-                                    .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
-                                    .clickable {
-                                        activeSlotType = "adidas"
-                                        activeTargetSlotId = null
-                                        photoPickerLauncher.launch(
-                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                        )
-                                    }
-                                    .testTag("slot_add_adidas_photo_card")
+                                    .fillMaxWidth()
+                                    .horizontalScroll(adidasScrollState)
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center,
+                                // Tarjeta + Subir Foto Adidas
+                                Card(
+                                    shape = RoundedCornerShape(20.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(18.dp)
+                                        .width(260.dp)
+                                        .height(290.dp)
+                                        .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
+                                        .clickable {
+                                            activeSlotType = "adidas"
+                                            activeTargetSlotId = null
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                            )
+                                        }
+                                        .testTag("slot_add_adidas_photo_card")
                                 ) {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
                                         modifier = Modifier
-                                            .size(64.dp)
-                                            .clip(CircleShape)
-                                            .background(AthenaPink.copy(alpha = 0.2f))
+                                            .fillMaxSize()
+                                            .padding(18.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.AddPhotoAlternate,
-                                            contentDescription = "Subir foto Adidas",
-                                            tint = AthenaPink,
-                                            modifier = Modifier.size(36.dp)
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier
+                                                .size(64.dp)
+                                                .clip(CircleShape)
+                                                .background(AthenaPink.copy(alpha = 0.2f))
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.AddPhotoAlternate,
+                                                contentDescription = "Subir foto Adidas",
+                                                tint = AthenaPink,
+                                                modifier = Modifier.size(36.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(14.dp))
+                                        Text(
+                                            text = "+ Subir Foto Adidas",
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = AthenaPink,
+                                            textAlign = TextAlign.Center
+                                        )
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = "Elige de tu galería",
+                                            fontSize = 12.sp,
+                                            color = Color.White.copy(alpha = 0.75f),
+                                            textAlign = TextAlign.Center
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(14.dp))
-                                    Text(
-                                        text = "+ Subir Foto Adidas",
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = AthenaPink,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = "Elige de tu galería",
-                                        fontSize = 12.sp,
-                                        color = Color.White.copy(alpha = 0.75f),
-                                        textAlign = TextAlign.Center
+                                }
+
+                                // Espacios con fotos cargadas (Campera jean, Conjunto 3 piezas, etc.)
+                                adidasSlots.forEach { slot ->
+                                    LargePhotoSlotCard(
+                                        slot = slot,
+                                        onUploadClick = {
+                                            activeSlotType = "adidas"
+                                            activeTargetSlotId = slot.id
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                            )
+                                        },
+                                        onRemoveClick = {
+                                            viewModel.removeAdidasSlot(slot.id)
+                                        },
+                                        onEditPriceClick = {
+                                            slotForPriceEdit = slot
+                                        },
+                                        onAddToCartClick = {
+                                            viewModel.addSlotToCart(slot)
+                                        }
                                     )
                                 }
                             }
 
-                            // Espacios con fotos cargadas (Campera jean, Conjunto 3 piezas, etc.)
-                            adidasSlots.forEach { slot ->
-                                LargePhotoSlotCard(
-                                    slot = slot,
-                                    onUploadClick = {
-                                        activeSlotType = "adidas"
-                                        activeTargetSlotId = slot.id
-                                        photoPickerLauncher.launch(
-                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                        )
-                                    },
-                                    onRemoveClick = {
-                                        viewModel.removeAdidasSlot(slot.id)
-                                    },
-                                    onEditPriceClick = {
-                                        slotForPriceEdit = slot
-                                    },
-                                    onAddToCartClick = {
-                                        viewModel.addSlotToCart(slot)
+                            // Flechas laterales Adidas
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        adidasScrollState.animateScrollBy(-600f)
                                     }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                                    .padding(start = 2.dp)
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                    .border(1.5.dp, AthenaPink, CircleShape)
+                                    .testTag("adidas_side_arrow_prev")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Correr foto anterior",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        adidasScrollState.animateScrollBy(600f)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 2.dp)
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                    .border(1.5.dp, AthenaPink, CircleShape)
+                                    .testTag("adidas_side_arrow_next")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = "Correr foto siguiente",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -651,103 +870,207 @@ fun CatalogScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // ESPACIOS PARA AGREGAR IMÁGENES SET MALIBÚ & CONJUNTOS
-                        Text(
-                            text = "ESPACIOS PARA IMÁGENES SET MALIBÚ",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.sp,
-                            color = AthenaPink
-                        )
-                        Text(
-                            text = "Fotos reales del Set Malibú en celeste, rosa y marrón chocolate.",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "ESPACIOS PARA IMÁGENES SET MALIBÚ",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 1.sp,
+                                    color = AthenaPink
+                                )
+                                Text(
+                                    text = "Fotos reales del Set Malibú en celeste, rosa y marrón chocolate.",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            // Flechas en encabezado para correr fotos
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            conjuntosScrollState.animateScrollBy(-600f)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF222030))
+                                        .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                        .testTag("conjuntos_header_arrow_prev")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Correr fotos izquierda",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            conjuntosScrollState.animateScrollBy(600f)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF222030))
+                                        .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                        .testTag("conjuntos_header_arrow_next")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = "Correr fotos derecha",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState())
-                        ) {
-                            // Tarjeta + Subir Foto Conjunto
-                            Card(
-                                shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 modifier = Modifier
-                                    .width(260.dp)
-                                    .height(290.dp)
-                                    .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
-                                    .clickable {
-                                        activeSlotType = "conjuntos"
-                                        activeTargetSlotId = null
-                                        photoPickerLauncher.launch(
-                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                        )
-                                    }
-                                    .testTag("slot_add_conjuntos_photo_card")
+                                    .fillMaxWidth()
+                                    .horizontalScroll(conjuntosScrollState)
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center,
+                                // Tarjeta + Subir Foto Conjunto
+                                Card(
+                                    shape = RoundedCornerShape(20.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(18.dp)
+                                        .width(260.dp)
+                                        .height(290.dp)
+                                        .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
+                                        .clickable {
+                                            activeSlotType = "conjuntos"
+                                            activeTargetSlotId = null
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                            )
+                                        }
+                                        .testTag("slot_add_conjuntos_photo_card")
                                 ) {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
                                         modifier = Modifier
-                                            .size(64.dp)
-                                            .clip(CircleShape)
-                                            .background(AthenaPink.copy(alpha = 0.2f))
+                                            .fillMaxSize()
+                                            .padding(18.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.AddPhotoAlternate,
-                                            contentDescription = "Subir foto Conjunto",
-                                            tint = AthenaPink,
-                                            modifier = Modifier.size(36.dp)
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier
+                                                .size(64.dp)
+                                                .clip(CircleShape)
+                                                .background(AthenaPink.copy(alpha = 0.2f))
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.AddPhotoAlternate,
+                                                contentDescription = "Subir foto Conjunto",
+                                                tint = AthenaPink,
+                                                modifier = Modifier.size(36.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(14.dp))
+                                        Text(
+                                            text = "+ Subir Foto Conjunto",
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = AthenaPink,
+                                            textAlign = TextAlign.Center
+                                        )
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = "Elige de tu galería",
+                                            fontSize = 12.sp,
+                                            color = Color.White.copy(alpha = 0.75f),
+                                            textAlign = TextAlign.Center
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(14.dp))
-                                    Text(
-                                        text = "+ Subir Foto Conjunto",
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = AthenaPink,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = "Elige de tu galería",
-                                        fontSize = 12.sp,
-                                        color = Color.White.copy(alpha = 0.75f),
-                                        textAlign = TextAlign.Center
+                                }
+
+                                // Espacios con fotos cargadas del Set Malibú (Celeste, Rosa, Marrón)
+                                conjuntosSlots.forEach { slot ->
+                                    LargePhotoSlotCard(
+                                        slot = slot,
+                                        onUploadClick = {
+                                            activeSlotType = "conjuntos"
+                                            activeTargetSlotId = slot.id
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                            )
+                                        },
+                                        onRemoveClick = {
+                                            viewModel.removeConjuntosSlot(slot.id)
+                                        },
+                                        onEditPriceClick = {
+                                            slotForPriceEdit = slot
+                                        },
+                                        onAddToCartClick = {
+                                            viewModel.addSlotToCart(slot)
+                                        }
                                     )
                                 }
                             }
 
-                            // Espacios con fotos cargadas del Set Malibú (Celeste, Rosa, Marrón)
-                            conjuntosSlots.forEach { slot ->
-                                LargePhotoSlotCard(
-                                    slot = slot,
-                                    onUploadClick = {
-                                        activeSlotType = "conjuntos"
-                                        activeTargetSlotId = slot.id
-                                        photoPickerLauncher.launch(
-                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                        )
-                                    },
-                                    onRemoveClick = {
-                                        viewModel.removeConjuntosSlot(slot.id)
-                                    },
-                                    onEditPriceClick = {
-                                        slotForPriceEdit = slot
-                                    },
-                                    onAddToCartClick = {
-                                        viewModel.addSlotToCart(slot)
+                            // Flechas laterales Conjuntos
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        conjuntosScrollState.animateScrollBy(-600f)
                                     }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                                    .padding(start = 2.dp)
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                    .border(1.5.dp, AthenaPink, CircleShape)
+                                    .testTag("conjuntos_side_arrow_prev")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Correr foto anterior",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        conjuntosScrollState.animateScrollBy(600f)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 2.dp)
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                    .border(1.5.dp, AthenaPink, CircleShape)
+                                    .testTag("conjuntos_side_arrow_next")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = "Correr foto siguiente",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }

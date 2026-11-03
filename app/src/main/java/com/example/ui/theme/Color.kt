@@ -19,6 +19,9 @@ val WarmBorder = Color(0xFFE6DFC9)
 
 val RoseBronze = Color(0xFFB57D78)
 val AthenaPink = Color(0xFFFF2885) // Electric Neon Flúor Pink
+val RosaFluor = Color(0xFFFF007F) // Rosa Flúor puro y delicado
+val RosaFluorBright = Color(0xFFFF10F0) // Rosa Flúor Neón intenso
+val RosaFluorGlow = Color(0xFFFF5EA8)
 val AthenaPinkGlow = Color(0xFFFF5EA8)
 val AthenaPinkDark = Color(0xFFD80A68)
 val AthenaPinkLight = Color(0xFFFFE8F3)

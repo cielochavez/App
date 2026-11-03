@@ -47,10 +47,17 @@ import com.example.ui.theme.AthenaPink
 import com.example.ui.theme.CrimsonSale
 import java.util.Locale
 
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.example.model.getGalleryDrawables
 
 @Composable
 fun ProductCard(
@@ -62,6 +69,9 @@ fun ProductCard(
     onEditPriceClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val gallery = remember(product.id) { product.getGalleryDrawables() }
+    var currentImageIndex by remember(product.id) { mutableIntStateOf(0) }
+
     Card(
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
@@ -75,20 +85,80 @@ fun ProductCard(
             .testTag("product_card_${product.id}")
     ) {
         Column {
-            // Large Photo Container (Grandes fotos, limpias sin botones invasivos)
+            // Large Photo Container with Navigation Arrows to slide photos
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(320.dp)
                     .background(Color(0xFFEDE8E0))
             ) {
-                // High-resolution Garment Image
+                // High-resolution Garment Image from Gallery
                 Image(
-                    painter = painterResource(id = product.getDrawableResId()),
+                    painter = painterResource(id = gallery.getOrElse(currentImageIndex) { product.getDrawableResId() }),
                     contentDescription = product.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
+
+                // Flechas para correr las fotos (Izquierda y Derecha)
+                if (gallery.size > 1) {
+                    IconButton(
+                        onClick = {
+                            currentImageIndex = if (currentImageIndex > 0) currentImageIndex - 1 else gallery.size - 1
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 8.dp)
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .testTag("arrow_prev_${product.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Foto Anterior",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            currentImageIndex = (currentImageIndex + 1) % gallery.size
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 8.dp)
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .testTag("arrow_next_${product.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Foto Siguiente",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    // Contador de fotos
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 12.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = "${currentImageIndex + 1} / ${gallery.size}",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
 
                 // Soft Bottom Gradient
                 Box(

@@ -1,6 +1,7 @@
 package com.example.viewmodel
 
 import android.app.Application
+import java.util.Locale
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.R

@@ -21,9 +21,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DryCleaning
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Remove
@@ -31,6 +33,9 @@ import androidx.compose.material.icons.filled.Rule
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Star
+import com.example.ui.components.PriceEditDialog
+import com.example.model.getGalleryDrawables
+import com.example.ui.theme.AthenaPink
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -89,6 +94,10 @@ fun ProductDetailScreen(
     var selectedColor by remember { mutableStateOf(product.colors.firstOrNull() ?: com.example.model.ProductColor("Dorado", 0xFFD4AF37)) }
     var quantity by remember { mutableIntStateOf(1) }
     var showSizeGuide by remember { mutableStateOf(false) }
+    var showPriceEditDialog by remember { mutableStateOf(false) }
+
+    val gallery = remember(product.id) { product.getGalleryDrawables() }
+    var currentImageIndex by remember(product.id) { mutableIntStateOf(0) }
 
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.contains(product.id)
@@ -172,12 +181,73 @@ fun ProductDetailScreen(
                     .height(380.dp)
                     .background(Color(0xFFEDE8E0))
             ) {
+                // High-resolution Garment Image with sliding gallery
                 Image(
-                    painter = painterResource(id = product.getDrawableResId()),
+                    painter = painterResource(id = gallery.getOrElse(currentImageIndex) { product.getDrawableResId() }),
                     contentDescription = product.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
+
+                // Flechas para correr las fotos (Izquierda y Derecha)
+                if (gallery.size > 1) {
+                    IconButton(
+                        onClick = {
+                            currentImageIndex = if (currentImageIndex > 0) currentImageIndex - 1 else gallery.size - 1
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 12.dp)
+                            .size(46.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.65f))
+                            .testTag("detail_arrow_prev")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Foto Anterior",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            currentImageIndex = (currentImageIndex + 1) % gallery.size
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 12.dp)
+                            .size(46.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.65f))
+                            .testTag("detail_arrow_next")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Foto Siguiente",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                    // Contador de fotos en la prenda
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.Black.copy(alpha = 0.7f))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "Foto ${currentImageIndex + 1} de ${gallery.size}",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
 
                 // Top navigation bar overlay
                 Row(
@@ -315,21 +385,52 @@ fun ProductDetailScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Price display
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Text(
-                        text = "$${String.format(Locale.US, "%.2f", product.price)}",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = AthenaGoldDark
-                    )
-                    if (product.originalPrice != null) {
-                        Spacer(modifier = Modifier.width(10.dp))
+                // Price display with option to edit/assign price
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.Bottom) {
                         Text(
-                            text = "$${String.format(Locale.US, "%.2f", product.originalPrice)}",
-                            fontSize = 16.sp,
-                            textDecoration = TextDecoration.LineThrough,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "$${String.format(Locale.US, "%.2f", product.price)}",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = AthenaGoldDark
+                        )
+                        if (product.originalPrice != null) {
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "$${String.format(Locale.US, "%.2f", product.originalPrice)}",
+                                fontSize = 16.sp,
+                                textDecoration = TextDecoration.LineThrough,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    // Botón para Asignar / Cambiar Precio
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(AthenaPink.copy(alpha = 0.15f))
+                            .clickable { showPriceEditDialog = true }
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                            .testTag("detail_edit_price_btn")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar Precio",
+                            tint = AthenaPink,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Cambiar Precio",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AthenaPink
                         )
                     }
                 }
@@ -649,6 +750,18 @@ fun ProductDetailScreen(
                 ) {
                     Text("Entendido")
                 }
+            }
+        )
+    }
+
+    // Diálogo para Cambiar o Asignar Precio en Detalle
+    if (showPriceEditDialog) {
+        PriceEditDialog(
+            itemName = product.name,
+            initialPrice = product.price,
+            onDismiss = { showPriceEditDialog = false },
+            onSavePrice = { newPrice ->
+                viewModel.updateProductPrice(product.id, newPrice)
             }
         )
     }

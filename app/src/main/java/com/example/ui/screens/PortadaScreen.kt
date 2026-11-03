@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
@@ -43,12 +44,20 @@ import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import com.example.model.getGalleryDrawables
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,6 +77,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.model.Product
@@ -81,7 +91,11 @@ import com.example.model.ProductCategory
 import com.example.ui.theme.AthenaPink
 import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.CrimsonSale
+import com.example.ui.theme.DancingScriptFontFamily
 import com.example.ui.theme.ObsidianNight
+import com.example.ui.theme.RosaFluor
+import com.example.ui.theme.RosaFluorBright
+import com.example.ui.theme.RosaFluorGlow
 import com.example.ui.theme.StatusSuccess
 import com.example.viewmodel.AthenaScreen
 import com.example.viewmodel.AthenaViewModel
@@ -94,6 +108,8 @@ fun PortadaScreen(
     val context = LocalContext.current
     val products by viewModel.products.collectAsState()
     var productForPriceEdit by remember { mutableStateOf<Product?>(null) }
+    val featuredScrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
 
     // Subtle ambient scale pulse for high-fashion appeal
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -110,34 +126,42 @@ fun PortadaScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF9E9E9E)) // Seamless matching background hex
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0xFF14121E),
+                        Color(0xFF1C182E),
+                        Color(0xFF12101B)
+                    )
+                )
+            )
             .testTag("portada_screen")
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(horizontal = 20.dp, vertical = 14.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // TOP BAR: STATUS BADGE & INSTAGRAM PILL
+            // 1. BARRA SUPERIOR: ESTADO ATELIER & INSTAGRAM
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 4.dp)
             ) {
-                // Live Boutique Open Indicator
+                // Indicador Boutique Abierta
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.92f))
-                        .padding(horizontal = 12.dp, vertical = 7.dp)
+                        .background(Color.White.copy(alpha = 0.95f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Box(
                         modifier = Modifier
@@ -155,14 +179,14 @@ fun PortadaScreen(
                     )
                 }
 
-                // Instagram Handle Button
+                // Botón Instagram Oficial
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .background(
                             Brush.horizontalGradient(
-                                listOf(AthenaPink, AthenaPinkDark)
+                                listOf(RosaFluor, AthenaPinkDark)
                             )
                         )
                         .clickable {
@@ -171,14 +195,14 @@ fun PortadaScreen(
                             clipboard.setPrimaryClip(clip)
                             Toast.makeText(context, "@Athena_Style_ copiado al portapapeles", Toast.LENGTH_SHORT).show()
                         }
-                        .padding(horizontal = 14.dp, vertical = 7.dp)
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
                         .testTag("instagram_handle_pill")
                 ) {
                     Icon(
                         imageVector = Icons.Default.CameraAlt,
                         contentDescription = "Instagram",
                         tint = Color.White,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
@@ -197,159 +221,58 @@ fun PortadaScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // FULLSCREEN HERO LOGO / COVER ARTWORK
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f, fill = false)
-                    .scale(heroScale)
-                    .testTag("portada_artwork_container")
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.athena_cover),
-                    contentDescription = "Portada Athena Style - TU ESTILO, TUS REGLAS",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                )
-            }
-
             Spacer(modifier = Modifier.height(14.dp))
 
-            // SLOGAN & BRAND IDENTITY
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF14121E))
-                        .border(1.5.dp, AthenaPink, RoundedCornerShape(10.dp))
-                        .padding(horizontal = 22.dp, vertical = 8.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = AthenaPink,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "TU ESTILO, TUS REGLAS",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.2.sp,
-                            color = Color.White
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    text = "INDUMENTARIA • ALTA MODA & ESTILO URBANO",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 2.sp,
-                    color = AthenaPinkDark
-                )
-            }
-
-            // FOTO DE PORTADA EN REBAJAS (Banner directo Boutique Athena)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF0F0E16))
-                    .border(1.2.dp, AthenaPink, RoundedCornerShape(16.dp))
-                    .clickable {
-                        viewModel.isOnlySaleFilter.value = true
-                        viewModel.selectedCategory.value = ProductCategory.REBAJAS
-                        viewModel.navigateTo(AthenaScreen.CATALOG)
-                    }
-                    .padding(8.dp)
-                    .testTag("portada_rebajas_shortcut_card")
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.banner_portada_rebajas),
-                        contentDescription = "Foto de portada en rebajas",
-                        contentScale = ContentScale.FillWidth,
-                        modifier = Modifier
-                            .width(135.dp)
-                            .height(52.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "🔥 REBAJAS BOUTIQUE",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = AthenaPink
-                        )
-                        Text(
-                            text = "10 prendas reales hasta 40% OFF",
-                            fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.85f)
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                        tint = AthenaPink,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // MENÚ PRINCIPAL: REBAJAS • ADIDAS • CONJUNTOS
+            // 2. MENÚ EN LA PARTE SUPERIOR DE LA PANTALLA: REBAJAS • ADIDAS • CONJUNTOS
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(22.dp))
-                    .background(Color(0xFF14121E))
-                    .border(1.2.dp, AthenaPink.copy(alpha = 0.5f), RoundedCornerShape(22.dp))
-                    .padding(16.dp)
+                    .background(Color(0xFF1B172C))
+                    .border(1.6.dp, RosaFluor.copy(alpha = 0.55f), RoundedCornerShape(22.dp))
+                    .padding(horizontal = 14.dp, vertical = 14.dp)
                     .testTag("portada_main_menu_card")
             ) {
-                Text(
-                    text = "MENÚ PRINCIPAL",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.5.sp,
-                    color = AthenaPink
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "Colecciones directas:",
-                    fontSize = 13.sp,
-                    color = Color.White.copy(alpha = 0.8f)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .clip(CircleShape)
+                                .background(RosaFluor)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "MENÚ PRINCIPAL",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.8.sp,
+                            color = RosaFluor
+                        )
+                    }
+                    Text(
+                        text = "Colecciones directas",
+                        fontSize = 11.sp,
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // 1. REBAJAS
+                    // 1. BOTÓN REBAJAS
                     Button(
                         onClick = { viewModel.openMenuSection(ProductCategory.REBAJAS) },
                         colors = ButtonDefaults.buttonColors(containerColor = CrimsonSale, contentColor = Color.White),
-                        shape = RoundedCornerShape(14.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp)
@@ -362,12 +285,12 @@ fun PortadaScreen(
                         )
                     }
 
-                    // 2. ADIDAS
+                    // 2. BOTÓN ADIDAS
                     Button(
                         onClick = { viewModel.openMenuSection(ProductCategory.ADIDAS) },
-                        colors = ButtonDefaults.buttonColors(containerColor = AthenaPink, contentColor = Color.Black),
-                        shape = RoundedCornerShape(14.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = RosaFluor, contentColor = Color.White),
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp)
@@ -376,16 +299,16 @@ fun PortadaScreen(
                         Text(
                             text = "👟 Adidas",
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Black
+                            fontWeight = FontWeight.Bold
                         )
                     }
 
-                    // 3. CONJUNTOS
+                    // 3. BOTÓN CONJUNTOS
                     Button(
                         onClick = { viewModel.openMenuSection(ProductCategory.SETS) },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFF14121E)),
-                        shape = RoundedCornerShape(14.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp)
@@ -397,6 +320,167 @@ fun PortadaScreen(
                             fontWeight = FontWeight.Bold
                         )
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 3. EN EL CENTRO: NOMBRE DE LA APP Athena_Style EN LETRA DELICADA COLOR ROSA FLÚOR
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                RosaFluor.copy(alpha = 0.16f),
+                                Color(0xFF1D182E).copy(alpha = 0.96f),
+                                Color(0xFF131122)
+                            )
+                        )
+                    )
+                    .border(2.dp, RosaFluor.copy(alpha = 0.85f), RoundedCornerShape(26.dp))
+                    .padding(horizontal = 20.dp, vertical = 26.dp)
+                    .testTag("portada_center_branding_card")
+            ) {
+                // Corona sutil / detalle decorativo
+                Text(
+                    text = "✧ ATELIER BOUTIQUE EXCLUSIVA ✧",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.5.sp,
+                    color = Color.White.copy(alpha = 0.75f)
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // NOMBRE DE LA APP EN LETRA DELICADA COLOR ROSA FLÚOR
+                Text(
+                    text = "Athena_Style",
+                    fontFamily = DancingScriptFontFamily,
+                    fontSize = 58.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = RosaFluor,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .scale(heroScale)
+                        .testTag("app_name_delicate_fluor_pink")
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Líneas decorativas con destello en rosa flúor
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(55.dp)
+                            .height(1.5.dp)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color.Transparent, RosaFluor)
+                                )
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = RosaFluor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(55.dp)
+                            .height(1.5.dp)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(RosaFluor, Color.Transparent)
+                                )
+                            )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "TU ESTILO, TUS REGLAS",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 3.sp,
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "INDUMENTARIA • ALTA MODA & ESTILO URBANO",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp,
+                    color = RosaFluorBright
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // BANNER DIRECTO REBAJAS BOUTIQUE (Sin imagen gigante)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFF1A1628))
+                    .border(1.2.dp, RosaFluor.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                    .clickable {
+                        viewModel.isOnlySaleFilter.value = true
+                        viewModel.selectedCategory.value = ProductCategory.REBAJAS
+                        viewModel.navigateTo(AthenaScreen.CATALOG)
+                    }
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                    .testTag("portada_rebajas_shortcut_card")
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape)
+                                .background(CrimsonSale.copy(alpha = 0.25f))
+                        ) {
+                            Text(text = "🔥", fontSize = 18.sp)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "REBAJAS EXCLUSIVAS",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = RosaFluor
+                            )
+                            Text(
+                                text = "Prendas seleccionadas con hasta 40% OFF",
+                                fontSize = 11.sp,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Ir a rebajas",
+                        tint = RosaFluor,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
             }
 
@@ -417,7 +501,7 @@ fun PortadaScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "PRENDAS DESTACADAS",
                             fontSize = 12.sp,
@@ -432,171 +516,138 @@ fun PortadaScreen(
                         )
                     }
 
-                    Text(
-                        text = "Ver Catálogo →",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AthenaPink,
-                        modifier = Modifier
-                            .clickable {
-                                viewModel.selectedCategory.value = ProductCategory.ALL
-                                viewModel.isOnlySaleFilter.value = false
-                                viewModel.navigateTo(AthenaScreen.CATALOG)
-                            }
-                            .padding(4.dp)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        // Flechas encabezado para correr fotos
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    featuredScrollState.animateScrollBy(-500f)
+                                }
+                            },
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF222030))
+                                .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                .testTag("portada_header_arrow_prev")
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Correr fotos izquierda",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    featuredScrollState.animateScrollBy(500f)
+                                }
+                            },
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF222030))
+                                .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                .testTag("portada_header_arrow_next")
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Correr fotos derecha",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+                        Text(
+                            text = "Ver Todo →",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AthenaPink,
+                            modifier = Modifier
+                                .clickable {
+                                    viewModel.selectedCategory.value = ProductCategory.ALL
+                                    viewModel.isOnlySaleFilter.value = false
+                                    viewModel.navigateTo(AthenaScreen.CATALOG)
+                                }
+                                .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                ) {
-                    products.take(6).forEach { product ->
-                        Card(
-                            shape = RoundedCornerShape(18.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
-                            modifier = Modifier
-                                .width(220.dp)
-                                .clip(RoundedCornerShape(18.dp))
-                                .testTag("portada_item_${product.id}")
-                        ) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(170.dp)
-                                        .background(Color(0xFFEDE8E0))
-                                ) {
-                                    Image(
-                                        painter = painterResource(id = product.getDrawableResId()),
-                                        contentDescription = product.name,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(featuredScrollState)
+                    ) {
+                        products.take(6).forEach { product ->
+                            PortadaFeaturedProductItem(
+                                product = product,
+                                onEditPrice = { productForPriceEdit = product },
+                                onAddToCart = {
+                                    viewModel.addToCart(
+                                        product = product,
+                                        size = product.sizes.firstOrNull() ?: "M",
+                                        color = product.colors.firstOrNull() ?: ProductColor("Dorado", 0xFFD4AF37)
                                     )
-                                    if (product.discountPercent != null) {
-                                        Box(
-                                            modifier = Modifier
-                                                .align(Alignment.TopStart)
-                                                .padding(8.dp)
-                                                .clip(RoundedCornerShape(6.dp))
-                                                .background(CrimsonSale)
-                                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                                        ) {
-                                            Text(
-                                                text = "-${product.discountPercent}%",
-                                                color = Color.White,
-                                                fontSize = 9.sp,
-                                                fontWeight = FontWeight.ExtraBold
-                                            )
-                                        }
-                                    }
                                 }
-
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp)
-                                ) {
-                                    Text(
-                                        text = product.name,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-
-                                    Spacer(modifier = Modifier.height(4.dp))
-
-                                    // LUGAR PARA PRECIO DEBAJO DE CADA IMAGEN
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Row(verticalAlignment = Alignment.Bottom) {
-                                            Text(
-                                                text = "$${String.format(Locale.US, "%.2f", product.price)}",
-                                                fontSize = 15.sp,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = AthenaGoldDark
-                                            )
-                                            if (product.originalPrice != null) {
-                                                Spacer(modifier = Modifier.width(4.dp))
-                                                Text(
-                                                    text = "$${String.format(Locale.US, "%.2f", product.originalPrice)}",
-                                                    fontSize = 11.sp,
-                                                    textDecoration = TextDecoration.LineThrough,
-                                                    color = Color.White.copy(alpha = 0.5f)
-                                                )
-                                            }
-                                        }
-
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(6.dp))
-                                                .background(AthenaPink.copy(alpha = 0.15f))
-                                                .clickable { productForPriceEdit = product }
-                                                .padding(horizontal = 6.dp, vertical = 3.dp)
-                                                .testTag("portada_edit_price_${product.id}")
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Edit,
-                                                contentDescription = "Editar Precio",
-                                                tint = AthenaPink,
-                                                modifier = Modifier.size(12.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(3.dp))
-                                            Text(
-                                                text = "Precio",
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = AthenaPink
-                                            )
-                                        }
-                                    }
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    // OPCIÓN DE AGREGAR AL CARRITO PARA COMPRAR
-                                    Button(
-                                        onClick = {
-                                            viewModel.addToCart(
-                                                product = product,
-                                                size = product.sizes.firstOrNull() ?: "M",
-                                                color = product.colors.firstOrNull() ?: ProductColor("Dorado", 0xFFD4AF37)
-                                            )
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = AthenaPink,
-                                            contentColor = Color.White
-                                        ),
-                                        shape = RoundedCornerShape(10.dp),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(36.dp)
-                                            .testTag("portada_add_cart_${product.id}")
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ShoppingBag,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text(
-                                            text = "Comprar • Carrito",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
+                            )
                         }
+                    }
+
+                    // Flechas laterales del carrusel para correr fotos cómodamente
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                featuredScrollState.animateScrollBy(-500f)
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 2.dp)
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                            .border(1.5.dp, AthenaPink, CircleShape)
+                            .testTag("portada_side_arrow_prev")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Correr prendas izquierda",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                featuredScrollState.animateScrollBy(500f)
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 2.dp)
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                            .border(1.5.dp, AthenaPink, CircleShape)
+                            .testTag("portada_side_arrow_next")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Correr prendas derecha",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
             }
@@ -754,5 +805,228 @@ private fun QuickNavIcon(
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF14121E)
         )
+    }
+}
+
+@Composable
+private fun PortadaFeaturedProductItem(
+    product: Product,
+    onEditPrice: () -> Unit,
+    onAddToCart: () -> Unit
+) {
+    val gallery = remember(product.id) { product.getGalleryDrawables() }
+    var currentImageIndex by remember(product.id) { mutableIntStateOf(0) }
+
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+        modifier = Modifier
+            .width(220.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .testTag("portada_item_${product.id}")
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(175.dp)
+                    .background(Color(0xFFEDE8E0))
+            ) {
+                val activeDrawable = if (gallery.isNotEmpty()) {
+                    gallery[currentImageIndex.coerceIn(0, gallery.lastIndex)]
+                } else {
+                    product.getDrawableResId()
+                }
+
+                Image(
+                    painter = painterResource(id = activeDrawable),
+                    contentDescription = product.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                if (product.discountPercent != null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(CrimsonSale)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "-${product.discountPercent}%",
+                            color = Color.White,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+                }
+
+                // Flechas para correr fotos individuales de la prenda si tiene varias fotos
+                if (gallery.size > 1) {
+                    // Contador de fotos
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.Black.copy(alpha = 0.65f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "${currentImageIndex + 1}/${gallery.size}",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+
+                    // Flecha izquierda correr foto
+                    IconButton(
+                        onClick = {
+                            currentImageIndex = if (currentImageIndex > 0) {
+                                currentImageIndex - 1
+                            } else {
+                                gallery.lastIndex
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 4.dp)
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .testTag("portada_card_arrow_prev_${product.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Foto anterior",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    // Flecha derecha correr foto
+                    IconButton(
+                        onClick = {
+                            currentImageIndex = if (currentImageIndex < gallery.lastIndex) {
+                                currentImageIndex + 1
+                            } else {
+                                0
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 4.dp)
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .testTag("portada_card_arrow_next_${product.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Foto siguiente",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = product.name,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // LUGAR PARA PRECIO DEBAJO DE CADA IMAGEN
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            text = "$${String.format(Locale.US, "%.2f", product.price)}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = AthenaGoldDark
+                        )
+                        if (product.originalPrice != null) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "$${String.format(Locale.US, "%.2f", product.originalPrice)}",
+                                fontSize = 11.sp,
+                                textDecoration = TextDecoration.LineThrough,
+                                color = Color.White.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(AthenaPink.copy(alpha = 0.15f))
+                            .clickable { onEditPrice() }
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
+                            .testTag("portada_edit_price_${product.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar Precio",
+                            tint = AthenaPink,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = "Precio",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AthenaPink
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // OPCIÓN DE AGREGAR AL CARRITO PARA COMPRAR
+                Button(
+                    onClick = { onAddToCart() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AthenaPink,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(36.dp)
+                        .testTag("portada_add_cart_${product.id}")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingBag,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Comprar • Carrito",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
     }
 }
