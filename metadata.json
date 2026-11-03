@@ -1,0 +1,6 @@
+{
+  "name": "Athena Style",
+  "description": "Tienda de moda de lujo Athena Style con catálogo interactivo, pasarela de pago segura, seguimiento de envíos en tiempo real, gestión de inventario y notificaciones push personalizadas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
