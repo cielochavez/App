@@ -1,5 +1,9 @@
 package com.example.ui.screens
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -66,6 +70,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -85,6 +90,7 @@ import com.example.ui.theme.StatusSuccess
 import com.example.viewmodel.AthenaScreen
 import com.example.viewmodel.AthenaViewModel
 import com.example.viewmodel.PaymentType
+import java.net.URLEncoder
 import java.util.Locale
 
 @Composable
@@ -98,6 +104,7 @@ fun CartAndCheckoutScreen(
     val step by viewModel.checkoutStep.collectAsState()
     val isProcessingPayment by viewModel.isProcessingPayment.collectAsState()
     val lastCompletedOrder by viewModel.lastCompletedOrder.collectAsState()
+    val context = LocalContext.current
 
     val customerName by viewModel.customerName.collectAsState()
     val deliveryAddress by viewModel.deliveryAddress.collectAsState()
@@ -300,6 +307,33 @@ fun CartAndCheckoutScreen(
                         .testTag("proceed_to_address_btn")
                 ) {
                     Text("Continuar a Entrega", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Button(
+                    onClick = {
+                        val orderMsg = formatWhatsAppOrderMessage(
+                            items = cart,
+                            subtotal = subtotal,
+                            discount = discount,
+                            total = total,
+                            customerName = customerName,
+                            deliveryAddress = deliveryAddress,
+                            deliveryCity = deliveryCity,
+                            deliveryNotes = deliveryNotes
+                        )
+                        launchWhatsAppOrder(context, orderMsg, "5492983529883")
+                        viewModel.processPayment()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366), contentColor = Color.White),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                        .testTag("whatsapp_order_direct_btn")
+                ) {
+                    Text("📲 Finalizar Compra por WhatsApp", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -550,11 +584,25 @@ fun CartAndCheckoutScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Pay Button with spinner
+            // Finalize purchase button with WhatsApp dispatch
             Button(
-                onClick = { viewModel.processPayment() },
+                onClick = {
+                    val orderMsg = formatWhatsAppOrderMessage(
+                        items = cart,
+                        subtotal = subtotal,
+                        discount = discount,
+                        total = total,
+                        customerName = customerName,
+                        deliveryAddress = deliveryAddress,
+                        deliveryCity = deliveryCity,
+                        deliveryNotes = deliveryNotes,
+                        paymentMethod = selectedPaymentType.displayName
+                    )
+                    launchWhatsAppOrder(context, orderMsg, "5492983529883")
+                    viewModel.processPayment()
+                },
                 enabled = !isProcessingPayment,
-                colors = ButtonDefaults.buttonColors(containerColor = AthenaGold, contentColor = ObsidianNight),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366), contentColor = Color.White),
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -563,17 +611,17 @@ fun CartAndCheckoutScreen(
             ) {
                 if (isProcessingPayment) {
                     CircularProgressIndicator(
-                        color = ObsidianNight,
+                        color = Color.White,
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.5.dp
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text("Procesando con Banco...", fontWeight = FontWeight.Bold)
+                    Text("Enviando Pedido a WhatsApp...", fontWeight = FontWeight.Bold)
                 } else {
-                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text("📲", fontSize = 18.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Pagar $${String.format(Locale.US, "%.2f", total)}",
+                        text = "Finalizar la Compra ($${String.format(Locale.US, "%.2f", total)})",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -668,7 +716,73 @@ fun CartAndCheckoutScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                // WhatsApp Confirmation Box
+                Card(
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF25D366).copy(alpha = 0.12f)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 14.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(14.dp)
+                    ) {
+                        Text("📲", fontSize = 26.sp)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Pedido enviado a WhatsApp",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = Color(0xFF1E7E34)
+                            )
+                            Text(
+                                text = "+54 9 2983 52-9883",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF1E7E34)
+                            )
+                            Text(
+                                text = "El mensaje con el detalle de prendas y entrega está listo.",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Button(
+                    onClick = {
+                        val orderMsg = formatWhatsAppOrderMessage(
+                            orderId = order.orderId,
+                            items = order.items,
+                            subtotal = order.subtotal,
+                            discount = order.discount,
+                            total = order.total,
+                            customerName = order.customerName,
+                            deliveryAddress = order.deliveryAddress,
+                            deliveryCity = order.deliveryCity,
+                            deliveryNotes = order.deliveryNotes,
+                            paymentMethod = order.paymentMethodName
+                        )
+                        launchWhatsAppOrder(context, orderMsg, "5492983529883")
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366), contentColor = Color.White),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .testTag("whatsapp_open_chat_btn")
+                ) {
+                    Text("📲", fontSize = 18.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Abrir Chat de WhatsApp con el Pedido", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
 
                 Button(
                     onClick = {
@@ -706,7 +820,7 @@ fun CartAndCheckoutScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(120.dp))
     }
 }
 
@@ -996,3 +1110,86 @@ private fun LuxuryCreditCardView(
         }
     }
 }
+
+/**
+ * Formats a clear, organized WhatsApp order message with products, quantities, sizes, prices and delivery info.
+ */
+fun formatWhatsAppOrderMessage(
+    orderId: String? = null,
+    items: List<CartItem>,
+    subtotal: Double,
+    discount: Double,
+    total: Double,
+    customerName: String,
+    deliveryAddress: String,
+    deliveryCity: String,
+    deliveryNotes: String,
+    paymentMethod: String? = null
+): String {
+    val sb = StringBuilder()
+    sb.append("🛍️ *¡Hola Athena Style! Quiero finalizar mi compra:*\n\n")
+    if (!orderId.isNullOrBlank()) {
+        sb.append("📋 *Orden:* #").append(orderId).append("\n\n")
+    }
+
+    sb.append("✨ *Detalle de prendas:*\n")
+    if (items.isEmpty()) {
+        sb.append("• Sin prendas en el carrito\n")
+    } else {
+        items.forEachIndexed { index, item ->
+            sb.append("${index + 1}. *${item.product.name}*\n")
+            sb.append("   • Talle: ${item.selectedSize} | Color: ${item.selectedColor.name}\n")
+            sb.append("   • Cantidad: ${item.quantity} x $${String.format(Locale.US, "%.2f", item.product.price)}\n")
+            sb.append("   • Subtotal: $${String.format(Locale.US, "%.2f", item.totalPrice)}\n\n")
+        }
+    }
+
+    sb.append("💵 *Resumen del Pedido:*\n")
+    sb.append("• Subtotal: $${String.format(Locale.US, "%.2f", subtotal)}\n")
+    if (discount > 0) {
+        sb.append("• Descuento: -$${String.format(Locale.US, "%.2f", discount)}\n")
+    }
+    sb.append("• Envío: Gratis VIP\n")
+    sb.append("• *TOTAL A PAGAR: $${String.format(Locale.US, "%.2f", total)}*\n\n")
+
+    if (customerName.isNotBlank() || deliveryAddress.isNotBlank()) {
+        sb.append("📍 *Datos de Entrega:*\n")
+        if (customerName.isNotBlank()) sb.append("• Destinatario: $customerName\n")
+        if (deliveryAddress.isNotBlank()) sb.append("• Dirección: $deliveryAddress\n")
+        if (deliveryCity.isNotBlank()) sb.append("• Ciudad: $deliveryCity\n")
+        if (deliveryNotes.isNotBlank()) sb.append("• Referencia: $deliveryNotes\n")
+    }
+    if (!paymentMethod.isNullOrBlank()) {
+        sb.append("• Forma de pago: $paymentMethod\n")
+    }
+
+    sb.append("\n_Enviado desde Athena_Style_ ✨")
+    return sb.toString()
+}
+
+/**
+ * Launches WhatsApp with the target phone number +54 9 2983 52-9883 and pre-filled order text.
+ */
+fun launchWhatsAppOrder(context: Context, message: String, phoneNumber: String = "5492983529883") {
+    try {
+        val encodedMessage = URLEncoder.encode(message, "UTF-8")
+        val whatsappIntent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=$encodedMessage")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        context.startActivity(whatsappIntent)
+    } catch (_: Exception) {
+        try {
+            // Fallback to general text share intent if WhatsApp is not directly resolvable
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, message)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(Intent.createChooser(shareIntent, "Enviar pedido de Athena Style"))
+        } catch (_: Exception) {
+            Toast.makeText(context, "No se pudo abrir WhatsApp", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+

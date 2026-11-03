@@ -32,9 +32,15 @@ data class Order(
     val deliveryNotes: String = "Entregar en portería o recepción principal",
     val paymentMethodName: String,
     val courierName: String = "Alejandro Valdés - VIP Courier",
-    val courierPhone: String = "+57 (310) 849-2144",
-    val courierVehicle: String = "Van Climatizada Athena VIP #12",
-    val courierProgress: Float = 0.65f, // 0.0f to 1.0f on route map
-    val estimatedMinutes: Int = 22,
+    val courierPhone: String = "+54 9 2983 52-9883",
+    val courierVehicle: String = "Moto Reparto Express Athena #04",
+    val courierProgress: Float = 0.0f, // 0.0f to 1.0f on route map
+    val estimatedMinutes: Int = 18,
+    val remainingDistanceKm: Double = 3.6,
+    val postalCode: String = "7500",
+    val latitude: Double = -38.3752,
+    val longitude: Double = -60.2783,
+    val isOrderAccepted: Boolean = false,
+    val courierStatusText: String = "Esperando que el Atelier acepte el pedido",
     val timeline: List<TrackingTimelineEvent> = emptyList()
 )

@@ -128,7 +128,10 @@ class AthenaRepository(
         deliveryCity: String,
         deliveryNotes: String,
         paymentMethodName: String,
-        shippingFee: Double
+        shippingFee: Double,
+        latitude: Double = -38.3752,
+        longitude: Double = -60.2783,
+        postalCode: String = "7500"
     ): Order {
         val currentCart = _cart.value
         val subtotal = currentCart.sumOf { it.totalPrice }
@@ -142,7 +145,7 @@ class AthenaRepository(
         val total = (subtotal - discount + shippingFee).coerceAtLeast(0.0)
 
         val newOrderId = "ATH-" + (1000..9999).random()
-        val trackingCode = "ATH-EXP-" + (10000..99999).random() + "-CO"
+        val trackingCode = "ATH-EXP-" + (10000..99999).random() + "-AR"
 
         val dateFormat = SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault())
         val formattedDate = dateFormat.format(Date())
@@ -150,35 +153,28 @@ class AthenaRepository(
         val timeline = listOf(
             TrackingTimelineEvent(
                 title = "Pedido Confirmado",
-                description = "Tu pago ha sido procesado mediante $paymentMethodName con cifrado 256-bit.",
+                description = "Tu pedido para Tres Arroyos (CP 7500) ha sido enviado. Esperando aceptación del Atelier.",
                 time = formattedDate,
                 isCompleted = true,
                 isCurrent = true
             ),
             TrackingTimelineEvent(
-                title = "Control de Calidad & Empaque de Lujo",
-                description = "Revisión artesanal de costuras, planchado a vapor y empaque en estuche Athena.",
+                title = "Aceptación & Preparación en Atelier",
+                description = "El Atelier Athena Style acepta el pedido y despacha las prendas en caja de lujo.",
                 time = "En preparación",
                 isCompleted = false,
                 isCurrent = false
             ),
             TrackingTimelineEvent(
-                title = "En Tránsito a Hub Express",
-                description = "Despacho con sellos inviolables de seguridad.",
+                title = "Repartidor en Camino (Tres Arroyos)",
+                description = "Ruta directa monitoreada con GPS en tiempo real hacia tu dirección.",
                 time = "Próximo paso",
                 isCompleted = false,
                 isCurrent = false
             ),
             TrackingTimelineEvent(
-                title = "En Reparto en tu Zona",
-                description = "Asignación de mensajero VIP en ruta.",
-                time = "Pendiente",
-                isCompleted = false,
-                isCurrent = false
-            ),
-            TrackingTimelineEvent(
-                title = "Entregado con Éxito",
-                description = "Entrega personal y confirmación de satisfacción.",
+                title = "Entregado en tu Domicilio",
+                description = "Firma y recepción en Tres Arroyos, Buenos Aires.",
                 time = "Pendiente",
                 isCompleted = false,
                 isCurrent = false
@@ -200,8 +196,14 @@ class AthenaRepository(
             deliveryCity = deliveryCity,
             deliveryNotes = deliveryNotes,
             paymentMethodName = paymentMethodName,
-            courierProgress = 0.15f,
-            estimatedMinutes = 35,
+            courierProgress = 0.0f,
+            estimatedMinutes = 16,
+            remainingDistanceKm = 3.5,
+            latitude = latitude,
+            longitude = longitude,
+            postalCode = postalCode,
+            isOrderAccepted = false,
+            courierStatusText = "Esperando que el Atelier acepte el pedido",
             timeline = timeline
         )
 
@@ -290,6 +292,84 @@ class AthenaRepository(
                         timeline = updatedTimeline
                     )
                 } else order
+            }
+        }
+    }
+
+    /**
+     * Acepta el pedido por parte del Atelier y activa el seguimiento GPS en tiempo real
+     * hacia el domicilio de la compradora en Tres Arroyos (CP 7500), calculando y reduciendo
+     * en tiempo real cuánto le falta para llegar a destino (minutos y km).
+     */
+    fun acceptOrderAndStartDelivery(orderId: String) {
+        _orders.update { list ->
+            list.map { ord ->
+                if (ord.orderId == orderId) {
+                    ord.copy(
+                        isOrderAccepted = true,
+                        status = OrderStatus.OUT_FOR_DELIVERY,
+                        courierStatusText = "¡Pedido aceptado! El repartidor salió hacia tu domicilio en Tres Arroyos (CP 7500)",
+                        estimatedMinutes = 15,
+                        remainingDistanceKm = 3.2,
+                        courierProgress = 0.15f
+                    )
+                } else ord
+            }
+        }
+
+        sendPushNotification(
+            title = "✅ ¡Pedido Aceptado por el Atelier!",
+            message = "El Atelier Athena ha aceptado tu compra. El repartidor ya va en camino hacia tu ubicación en Tres Arroyos (CP 7500).",
+            type = NotificationType.ORDER_UPDATE,
+            linkedOrderId = orderId
+        )
+
+        // Simulación en tiempo real: el repartidor avanza por Tres Arroyos marcando cuánto falta para llegar
+        scope.launch {
+            val steps = listOf(
+                Triple(0.25f, 13, 2.7),
+                Triple(0.42f, 10, 2.1),
+                Triple(0.60f, 7, 1.4),
+                Triple(0.78f, 4, 0.8),
+                Triple(0.92f, 2, 0.3),
+                Triple(1.00f, 0, 0.0)
+            )
+            for (step in steps) {
+                delay(3200) // cada 3.2 segundos avanza en tiempo real
+                _orders.update { list ->
+                    list.map { ord ->
+                        if (ord.orderId == orderId) {
+                            val isFinal = step.first >= 1.0f
+                            ord.copy(
+                                courierProgress = step.first,
+                                estimatedMinutes = step.second,
+                                remainingDistanceKm = step.third,
+                                status = if (isFinal) OrderStatus.DELIVERED else OrderStatus.OUT_FOR_DELIVERY,
+                                courierStatusText = when {
+                                    isFinal -> "🎉 ¡Repartidor ha llegado a tu puerta en Tres Arroyos! Disfruta tu prenda."
+                                    step.second <= 2 -> "📍 ¡A solo 2 cuadras de tu destino en Tres Arroyos!"
+                                    step.second <= 5 -> "🛵 En camino: Faltan ${step.second} min (${step.third} km) para llegar."
+                                    else -> "🛵 Repartidor en ruta en Tres Arroyos: Faltan ${step.second} min (${step.third} km)."
+                                }
+                            )
+                        } else ord
+                    }
+                }
+                if (step.second == 4) {
+                    sendPushNotification(
+                        title = "🛵 Repartidor muy cerca de tu destino",
+                        message = "Faltan solo 4 minutos para llegar a tu dirección en Tres Arroyos (CP 7500).",
+                        type = NotificationType.ORDER_UPDATE,
+                        linkedOrderId = orderId
+                    )
+                } else if (step.first >= 1.0f) {
+                    sendPushNotification(
+                        title = "🎉 ¡Pedido Entregado!",
+                        message = "Tu orden exclusiva ha llegado a tu domicilio en Tres Arroyos. ¡Gracias por elegir Athena Style!",
+                        type = NotificationType.ORDER_UPDATE,
+                        linkedOrderId = orderId
+                    )
+                }
             }
         }
     }

@@ -152,7 +152,7 @@ fun CatalogScreen(
 
     // Smooth downwards scrolling column with large, prominent photo spaces and simple UI
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 100.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
         modifier = modifier
             .fillMaxSize()

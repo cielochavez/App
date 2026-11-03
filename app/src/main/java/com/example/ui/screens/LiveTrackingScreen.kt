@@ -143,7 +143,13 @@ fun LiveTrackingScreen(
                 status = order.status,
                 courierName = order.courierName,
                 estimatedMinutes = order.estimatedMinutes,
-                destinationAddress = order.deliveryAddress
+                destinationAddress = order.deliveryAddress,
+                remainingDistanceKm = order.remainingDistanceKm,
+                latitude = order.latitude,
+                longitude = order.longitude,
+                isAccepted = order.isOrderAccepted,
+                courierStatusText = order.courierStatusText,
+                onAcceptOrder = { viewModel.acceptOrderAndStartDelivery(order.orderId) }
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -376,7 +382,7 @@ fun LiveTrackingScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(120.dp))
     }
 }
 

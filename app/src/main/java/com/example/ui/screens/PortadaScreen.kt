@@ -739,7 +739,7 @@ fun PortadaScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(110.dp))
         }
 
         // Diálogo para Asignar / Cambiar Precio desde la Portada

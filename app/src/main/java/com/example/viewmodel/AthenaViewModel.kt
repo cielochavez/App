@@ -303,9 +303,13 @@ class AthenaViewModel @JvmOverloads constructor(
     // Checkout Form State
     val checkoutStep = MutableStateFlow(1) // 1: Cart, 2: Address & Shipping, 3: Payment Gateway, 4: Success
     val customerName = MutableStateFlow("Camila Restrepo")
-    val deliveryAddress = MutableStateFlow("Calle 85 #11-53, Apto 701")
-    val deliveryCity = MutableStateFlow("Bogotá")
-    val deliveryNotes = MutableStateFlow("Entregar en caja Athena Signature con lacre")
+    val deliveryAddress = MutableStateFlow("Av. Moreno 350, Centro")
+    val deliveryCity = MutableStateFlow("Tres Arroyos, Buenos Aires")
+    val postalCode = MutableStateFlow("7500")
+    val deliveryNotes = MutableStateFlow("Entregar en recepción o puerta principal")
+    val buyerLatitude = MutableStateFlow(-38.3752)
+    val buyerLongitude = MutableStateFlow(-60.2783)
+    val isGpsLocationDetected = MutableStateFlow(false)
     val selectedPaymentType = MutableStateFlow(PaymentType.CREDIT_CARD)
 
     // Credit Card Fields
@@ -693,16 +697,30 @@ class AthenaViewModel @JvmOverloads constructor(
 
             val newOrder = repository.placeOrder(
                 customerName = customerName.value.ifBlank { "Cliente Athena VIP" },
-                deliveryAddress = deliveryAddress.value.ifBlank { "Dirección Principal" },
-                deliveryCity = deliveryCity.value.ifBlank { "Bogotá" },
+                deliveryAddress = deliveryAddress.value.ifBlank { "Av. Moreno 350, Centro" },
+                deliveryCity = deliveryCity.value.ifBlank { "Tres Arroyos, Buenos Aires" },
                 deliveryNotes = deliveryNotes.value,
                 paymentMethodName = paymentName,
-                shippingFee = 0.0 // Free Express VIP
+                shippingFee = 0.0, // Free Express VIP
+                latitude = buyerLatitude.value,
+                longitude = buyerLongitude.value,
+                postalCode = postalCode.value.ifBlank { "7500" }
             )
 
             lastCompletedOrder.value = newOrder
             checkoutStep.value = 4 // Success screen
         }
+    }
+
+    fun setBuyerGpsLocation(lat: Double, lng: Double, addressHint: String? = null) {
+        buyerLatitude.value = lat
+        buyerLongitude.value = lng
+        isGpsLocationDetected.value = true
+        if (!addressHint.isNullOrBlank()) {
+            deliveryAddress.value = addressHint
+        }
+        deliveryCity.value = "Tres Arroyos, Buenos Aires (CP 7500)"
+        postalCode.value = "7500"
     }
 
     fun resetCheckout() {
@@ -713,6 +731,10 @@ class AthenaViewModel @JvmOverloads constructor(
     // Live Tracking actions
     fun selectActiveOrder(orderId: String) {
         repository.selectActiveOrder(orderId)
+    }
+
+    fun acceptOrderAndStartDelivery(orderId: String) {
+        repository.acceptOrderAndStartDelivery(orderId)
     }
 
     fun advanceOrderTrackingStage(orderId: String) {

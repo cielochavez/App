@@ -288,7 +288,7 @@ fun WishlistScreen(
 
         // Bottom spacer for scrollability
         item {
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(120.dp))
         }
     }
 
