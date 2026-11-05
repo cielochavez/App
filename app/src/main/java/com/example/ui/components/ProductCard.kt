@@ -44,7 +44,12 @@ import com.example.model.Product
 import com.example.model.getDrawableResId
 import com.example.ui.theme.AthenaGoldDark
 import com.example.ui.theme.AthenaPink
+import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.CrimsonSale
+import com.example.ui.theme.NeutralDark
+import com.example.ui.theme.WarmBorder
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import java.util.Locale
 
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -74,6 +79,7 @@ fun ProductCard(
 
     Card(
         shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.2.dp, WarmBorder),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -111,13 +117,14 @@ fun ProductCard(
                             .padding(start = 8.dp)
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
+                            .background(Color.White.copy(alpha = 0.90f))
+                            .border(1.2.dp, AthenaPink, CircleShape)
                             .testTag("arrow_prev_${product.id}")
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Foto Anterior",
-                            tint = Color.White,
+                            tint = AthenaPinkDark,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -131,13 +138,14 @@ fun ProductCard(
                             .padding(end = 8.dp)
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
+                            .background(Color.White.copy(alpha = 0.90f))
+                            .border(1.2.dp, AthenaPink, CircleShape)
                             .testTag("arrow_next_${product.id}")
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Foto Siguiente",
-                            tint = Color.White,
+                            tint = AthenaPinkDark,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -148,14 +156,15 @@ fun ProductCard(
                             .align(Alignment.BottomCenter)
                             .padding(bottom = 12.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Color.Black.copy(alpha = 0.6f))
+                            .background(Color.White.copy(alpha = 0.90f))
+                            .border(1.dp, WarmBorder, RoundedCornerShape(10.dp))
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
                             text = "${currentImageIndex + 1} / ${gallery.size}",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = NeutralDark
                         )
                     }
                 }
@@ -167,9 +176,9 @@ fun ProductCard(
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    Color.Black.copy(alpha = 0.25f),
+                                    Color.Black.copy(alpha = 0.10f),
                                     Color.Transparent,
-                                    Color.Black.copy(alpha = 0.45f)
+                                    Color.Black.copy(alpha = 0.20f)
                                 )
                             )
                         )
@@ -220,13 +229,14 @@ fun ProductCard(
                         .padding(10.dp)
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.4f))
+                        .background(Color.White.copy(alpha = 0.90f))
+                        .border(1.dp, WarmBorder, CircleShape)
                         .testTag("fav_btn_${product.id}")
                 ) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Favorito",
-                        tint = if (isFavorite) AthenaPink else Color.White,
+                        tint = if (isFavorite) AthenaPinkDark else NeutralDark,
                         modifier = Modifier.size(22.dp)
                     )
                 }

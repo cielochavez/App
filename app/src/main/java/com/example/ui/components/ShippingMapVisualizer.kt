@@ -18,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,9 +65,12 @@ import com.example.model.OrderStatus
 import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
 import com.example.ui.theme.AthenaPink
+import com.example.ui.theme.NeutralDark
+import com.example.ui.theme.NeutralMedium
 import com.example.ui.theme.ObsidianNight
 import com.example.ui.theme.RosaFluor
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.WarmBorder
 import java.util.Locale
 
 @Composable
@@ -107,9 +111,9 @@ fun ShippingMapVisualizer(
 
     Card(
         shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = ObsidianNight),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        border = androidx.compose.foundation.BorderStroke(1.2.dp, AthenaGold.copy(alpha = 0.4f)),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, WarmBorder),
         modifier = modifier
             .fillMaxWidth()
             .testTag("shipping_map_container")
@@ -119,32 +123,33 @@ fun ShippingMapVisualizer(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Header con Google Maps Tres Arroyos y botón para abrir
+            // Header con GPS en vivo, vendedor Athena_style y celular +54 9 2983 52-9883
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                     Box(
                         modifier = Modifier
                             .size(10.dp)
                             .clip(CircleShape)
-                            .background(if (isAccepted) StatusSuccess else AthenaGold)
+                            .background(if (isAccepted) RosaFluor else AthenaGold)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = "🗺️ GOOGLE MAPS EN VIVO",
+                            text = "🗺️ GPS • VENDEDOR: Athena_style",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.2.sp,
-                            color = AthenaGold
+                            color = RosaFluor
                         )
                         Text(
-                            text = "Tres Arroyos, Bs. As. (CP 7500)",
+                            text = "Cel: +54 9 2983 52-9883 • Tres Arroyos (CP 7500)",
                             fontSize = 10.sp,
-                            color = Color.White.copy(alpha = 0.75f)
+                            fontWeight = FontWeight.Medium,
+                            color = NeutralDark
                         )
                     }
                 }
@@ -154,8 +159,8 @@ fun ShippingMapVisualizer(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF222032))
-                        .border(1.dp, AthenaGold.copy(alpha = 0.6f), RoundedCornerShape(10.dp))
+                        .background(Color(0xFFF2ECE8))
+                        .border(1.dp, WarmBorder, RoundedCornerShape(10.dp))
                         .clickable {
                             try {
                                 val gmmIntentUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=$latitude,$longitude")
@@ -173,7 +178,7 @@ fun ShippingMapVisualizer(
                     Icon(
                         imageVector = Icons.Default.Directions,
                         contentDescription = "Abrir Google Maps",
-                        tint = AthenaGold,
+                        tint = AthenaGoldDark,
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -181,7 +186,7 @@ fun ShippingMapVisualizer(
                         text = "Ver Mapa",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = NeutralDark
                     )
                 }
             }
@@ -195,9 +200,9 @@ fun ShippingMapVisualizer(
                     .clip(RoundedCornerShape(12.dp))
                     .background(
                         if (isAccepted) {
-                            if (progress >= 1.0f) StatusSuccess.copy(alpha = 0.2f) else RosaFluor.copy(alpha = 0.16f)
+                            if (progress >= 1.0f) StatusSuccess.copy(alpha = 0.12f) else RosaFluor.copy(alpha = 0.12f)
                         } else {
-                            AthenaGold.copy(alpha = 0.15f)
+                            AthenaGold.copy(alpha = 0.12f)
                         }
                     )
                     .border(
@@ -233,12 +238,12 @@ fun ShippingMapVisualizer(
                                 text = etaText,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = NeutralDark
                             )
                             Text(
                                 text = courierStatusText ?: "GPS activo en Tres Arroyos (CP 7500)",
                                 fontSize = 10.sp,
-                                color = Color.White.copy(alpha = 0.75f)
+                                color = NeutralMedium
                             )
                         }
                     }
@@ -291,15 +296,15 @@ fun ShippingMapVisualizer(
                     .fillMaxWidth()
                     .height(210.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF141320))
+                    .background(Color(0xFF1E1A2C))
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val w = size.width
                     val h = size.height
 
                     // Calles y avenidas de Tres Arroyos
-                    val roadColor = Color(0xFF252236)
-                    val mainAvenueColor = Color(0xFF38334E)
+                    val roadColor = Color(0xFF2C273E)
+                    val mainAvenueColor = Color(0xFF3F3756)
 
                     // Cuadrícula típica de Tres Arroyos (Avenidas diagonales y ortogonales)
                     drawLine(roadColor, Offset(0f, h * 0.20f), Offset(w, h * 0.20f), strokeWidth = 3f)
@@ -422,12 +427,17 @@ fun ShippingMapVisualizer(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Storefront,
-                            contentDescription = "Atelier",
-                            tint = AthenaGold,
+                            contentDescription = "Vendedor Athena_style",
+                            tint = RosaFluor,
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Atelier Athena (Tres Arroyos)", fontSize = 10.sp, color = Color.White)
+                        Text(
+                            text = "Vendedor: Athena_style • Cel: +54 9 2983 52-9883",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = RosaFluor
+                        )
                     }
                 }
 
@@ -450,7 +460,7 @@ fun ShippingMapVisualizer(
                         Text(
                             text = destinationAddress.take(18) + "... (CP 7500)",
                             fontSize = 10.sp,
-                            color = Color.White
+                            color = NeutralDark
                         )
                     }
                 }
@@ -483,19 +493,19 @@ fun ShippingMapVisualizer(
                         text = "$courierName • Reparto Tres Arroyos",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
-                        color = Color.White
+                        color = NeutralDark
                     )
                     Text(
                         text = if (!isAccepted) "Esperando confirmación para iniciar viaje" else "En ruta hacia tu domicilio (CP 7500)",
                         fontSize = 11.sp,
-                        color = if (isAccepted) RosaFluor else AthenaGold
+                        color = if (isAccepted) RosaFluor else AthenaGoldDark
                     )
                 }
                 Text(
                     text = "${(progress * 100).toInt()}%",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = NeutralDark
                 )
             }
 
@@ -504,12 +514,77 @@ fun ShippingMapVisualizer(
             LinearProgressIndicator(
                 progress = { progress.coerceIn(0.0f, 1.0f) },
                 color = if (isAccepted) RosaFluor else AthenaGold,
-                trackColor = Color(0xFF28253B),
+                trackColor = Color(0xFFF0EAE6),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp))
             )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Tarjeta Vendedor Athena_style y Celular en el GPS
+            Card(
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7F9)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, RosaFluor.copy(alpha = 0.35f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(RosaFluor.copy(alpha = 0.2f))
+                        ) {
+                            Text("👗", fontSize = 16.sp)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                text = "Vendedor: Athena_style",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 12.sp,
+                                color = RosaFluor
+                            )
+                            Text(
+                                text = "Cel: +54 9 2983 52-9883 (Tres Arroyos)",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = NeutralDark
+                            )
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW).apply {
+                                    data = Uri.parse("https://api.whatsapp.com/send?phone=5492983529883")
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                context.startActivity(intent)
+                            } catch (_: Exception) {
+                                Toast.makeText(context, "Cel: +54 9 2983 52-9883", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366), contentColor = Color.White),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Text("📲 Contactar", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
         }
     }
 }

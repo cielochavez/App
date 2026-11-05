@@ -47,8 +47,13 @@ import com.example.model.AppNotification
 import com.example.model.NotificationType
 import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
+import com.example.ui.theme.AthenaPink
+import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.CrimsonSale
-import com.example.ui.theme.ObsidianNight
+import com.example.ui.theme.NeutralDark
+import com.example.ui.theme.NeutralMedium
+import com.example.ui.theme.WarmBorder
+import androidx.compose.foundation.BorderStroke
 
 @Composable
 fun PushNotificationBanner(
@@ -66,9 +71,10 @@ fun PushNotificationBanner(
         if (notification != null) {
             Card(
                 shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.2.dp, WarmBorder),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = ObsidianNight
+                    containerColor = Color.White
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -83,8 +89,8 @@ fun PushNotificationBanner(
                         .background(
                             Brush.horizontalGradient(
                                 colors = listOf(
-                                    ObsidianNight,
-                                    Color(0xFF282338)
+                                    Color.White,
+                                    Color(0xFFFFF7F9)
                                 )
                             )
                         )
@@ -105,10 +111,10 @@ fun PushNotificationBanner(
                         }
 
                         val iconBg = when (notification.type) {
-                            NotificationType.ORDER_UPDATE -> AthenaGold
+                            NotificationType.ORDER_UPDATE -> AthenaPinkDark
                             NotificationType.INVENTORY_ALERT -> CrimsonSale
-                            NotificationType.PROMO_DROP -> AthenaGoldDark
-                            else -> AthenaGold
+                            NotificationType.PROMO_DROP -> AthenaPinkDark
+                            else -> AthenaPinkDark
                         }
 
                         Box(
@@ -116,7 +122,7 @@ fun PushNotificationBanner(
                             modifier = Modifier
                                 .size(42.dp)
                                 .clip(CircleShape)
-                                .background(iconBg.copy(alpha = 0.2f))
+                                .background(iconBg.copy(alpha = 0.12f))
                         ) {
                             Icon(
                                 imageVector = iconVector,
@@ -135,13 +141,13 @@ fun PushNotificationBanner(
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.sp,
-                                    color = AthenaGold
+                                    color = AthenaPinkDark
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "• ${notification.timeAgo}",
                                     fontSize = 10.sp,
-                                    color = Color.LightGray
+                                    color = NeutralMedium
                                 )
                             }
                             Spacer(modifier = Modifier.height(2.dp))
@@ -149,14 +155,14 @@ fun PushNotificationBanner(
                                 text = notification.title,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
-                                color = Color.White,
+                                color = NeutralDark,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = notification.message,
                                 fontSize = 11.sp,
-                                color = Color.White.copy(alpha = 0.85f),
+                                color = NeutralMedium,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -171,7 +177,7 @@ fun PushNotificationBanner(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Cerrar Notificación",
-                                tint = Color.LightGray,
+                                tint = NeutralMedium,
                                 modifier = Modifier.size(18.dp)
                             )
                         }

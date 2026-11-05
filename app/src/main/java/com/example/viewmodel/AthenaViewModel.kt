@@ -40,6 +40,7 @@ enum class AthenaScreen(val title: String) {
 }
 
 enum class PaymentType(val displayName: String) {
+    CASH("Efectivo (Contra Entrega)"),
     CREDIT_CARD("Tarjeta de Crédito / Débito"),
     DIGITAL_WALLET("Billetera Digital (Nequi / Daviplata / G-Pay)"),
     PSE("PSE / Transferencia Bancaria")
@@ -310,7 +311,7 @@ class AthenaViewModel @JvmOverloads constructor(
     val buyerLatitude = MutableStateFlow(-38.3752)
     val buyerLongitude = MutableStateFlow(-60.2783)
     val isGpsLocationDetected = MutableStateFlow(false)
-    val selectedPaymentType = MutableStateFlow(PaymentType.CREDIT_CARD)
+    val selectedPaymentType = MutableStateFlow(PaymentType.CASH)
 
     // Credit Card Fields
     val cardNumber = MutableStateFlow("4532 8920 1192 4242")
@@ -690,6 +691,7 @@ class AthenaViewModel @JvmOverloads constructor(
             isProcessingPayment.value = false
 
             val paymentName = when (selectedPaymentType.value) {
+                PaymentType.CASH -> "Efectivo Contra Entrega (Pagar al Recibir en Tres Arroyos)"
                 PaymentType.CREDIT_CARD -> "Tarjeta terminada en ${cardNumber.value.takeLast(4)}"
                 PaymentType.DIGITAL_WALLET -> "Billetera Digital Nequi / GPay"
                 PaymentType.PSE -> "PSE Débito Bancario"

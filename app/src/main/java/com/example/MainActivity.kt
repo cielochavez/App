@@ -66,6 +66,7 @@ import com.example.ui.screens.WishlistScreen
 import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
 import com.example.ui.theme.AthenaPink
+import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.AthenaStyleTheme
 import com.example.ui.theme.ObsidianNight
 import com.example.viewmodel.AthenaScreen
@@ -124,6 +125,7 @@ fun AthenaApp(
     }
 
     Scaffold(
+        containerColor = Color.White,
         contentWindowInsets = if (currentScreen == AthenaScreen.PORTADA) WindowInsets(0, 0, 0, 0) else WindowInsets.safeDrawing,
         topBar = {
             if (currentScreen != AthenaScreen.PORTADA) {
@@ -149,7 +151,7 @@ fun AthenaApp(
                 val isCatalog = currentScreen == AthenaScreen.CATALOG
 
                 NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = Color.White,
                     contentColor = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.testTag("main_bottom_nav")
                 ) {
@@ -164,9 +166,11 @@ fun AthenaApp(
                         },
                         label = { Text("Inicio", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = ObsidianNight,
-                            selectedTextColor = AthenaPink,
-                            indicatorColor = AthenaPink
+                            selectedIconColor = Color.White,
+                            selectedTextColor = AthenaPinkDark,
+                            indicatorColor = AthenaPink,
+                            unselectedIconColor = Color(0xFF6E6A78),
+                            unselectedTextColor = Color(0xFF6E6A78)
                         ),
                         modifier = Modifier.testTag("nav_item_portada")
                     )
@@ -202,9 +206,11 @@ fun AthenaApp(
                         },
                         label = { Text("Adidas", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = ObsidianNight,
-                            selectedTextColor = AthenaPink,
-                            indicatorColor = AthenaPink
+                            selectedIconColor = Color.White,
+                            selectedTextColor = AthenaPinkDark,
+                            indicatorColor = AthenaPink,
+                            unselectedIconColor = Color(0xFF6E6A78),
+                            unselectedTextColor = Color(0xFF6E6A78)
                         ),
                         modifier = Modifier.testTag("nav_item_adidas")
                     )
@@ -221,9 +227,11 @@ fun AthenaApp(
                         },
                         label = { Text("Conjuntos", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = ObsidianNight,
-                            selectedTextColor = AthenaPink,
-                            indicatorColor = AthenaPink
+                            selectedIconColor = Color.White,
+                            selectedTextColor = AthenaPinkDark,
+                            indicatorColor = AthenaPink,
+                            unselectedIconColor = Color(0xFF6E6A78),
+                            unselectedTextColor = Color(0xFF6E6A78)
                         ),
                         modifier = Modifier.testTag("nav_item_conjuntos")
                     )
@@ -235,7 +243,7 @@ fun AthenaApp(
                             BadgedBox(
                                 badge = {
                                     if (wishlistCount > 0) {
-                                        Badge(containerColor = AthenaPink, contentColor = ObsidianNight) {
+                                        Badge(containerColor = AthenaPink, contentColor = Color.White) {
                                             Text(wishlistCount.toString(), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                         }
                                     }
@@ -249,9 +257,11 @@ fun AthenaApp(
                         },
                         label = { Text("Deseos", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = ObsidianNight,
-                            selectedTextColor = AthenaPink,
-                            indicatorColor = AthenaPink
+                            selectedIconColor = Color.White,
+                            selectedTextColor = AthenaPinkDark,
+                            indicatorColor = AthenaPink,
+                            unselectedIconColor = Color(0xFF6E6A78),
+                            unselectedTextColor = Color(0xFF6E6A78)
                         ),
                         modifier = Modifier.testTag("nav_item_wishlist")
                     )

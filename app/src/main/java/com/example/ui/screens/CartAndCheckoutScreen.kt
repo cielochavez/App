@@ -1,9 +1,13 @@
 package com.example.ui.screens
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.location.LocationManager
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,7 +43,10 @@ import androidx.compose.material.icons.filled.Discount
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.SimCard
@@ -82,11 +89,17 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.model.CartItem
 import com.example.model.getDrawableResId
+import com.example.ui.components.ShippingMapVisualizer
 import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
+import com.example.ui.theme.AthenaPink
+import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.CrimsonSale
+import com.example.ui.theme.NeutralDark
+import com.example.ui.theme.NeutralMedium
 import com.example.ui.theme.ObsidianNight
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.WarmBorder
 import com.example.viewmodel.AthenaScreen
 import com.example.viewmodel.AthenaViewModel
 import com.example.viewmodel.PaymentType
@@ -104,12 +117,17 @@ fun CartAndCheckoutScreen(
     val step by viewModel.checkoutStep.collectAsState()
     val isProcessingPayment by viewModel.isProcessingPayment.collectAsState()
     val lastCompletedOrder by viewModel.lastCompletedOrder.collectAsState()
+    val orders by viewModel.orders.collectAsState()
     val context = LocalContext.current
 
     val customerName by viewModel.customerName.collectAsState()
     val deliveryAddress by viewModel.deliveryAddress.collectAsState()
     val deliveryCity by viewModel.deliveryCity.collectAsState()
+    val postalCode by viewModel.postalCode.collectAsState()
     val deliveryNotes by viewModel.deliveryNotes.collectAsState()
+    val buyerLatitude by viewModel.buyerLatitude.collectAsState()
+    val buyerLongitude by viewModel.buyerLongitude.collectAsState()
+    val isGpsLocationDetected by viewModel.isGpsLocationDetected.collectAsState()
 
     val selectedPaymentType by viewModel.selectedPaymentType.collectAsState()
     val cardNumber by viewModel.cardNumber.collectAsState()
@@ -130,6 +148,39 @@ fun CartAndCheckoutScreen(
 
     var couponInput by remember { mutableStateOf("") }
     var couponError by remember { mutableStateOf(false) }
+
+    // Launcher for acquiring buyer's current GPS location in Tres Arroyos
+    val locationLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            try {
+                val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+                val lastGps = locationManager?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    ?: locationManager?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                if (lastGps != null) {
+                    viewModel.setBuyerGpsLocation(
+                        lat = lastGps.latitude,
+                        lng = lastGps.longitude,
+                        addressHint = "Ubicación GPS (${String.format(Locale.US, "%.4f", lastGps.latitude)}, ${String.format(Locale.US, "%.4f", lastGps.longitude)})"
+                    )
+                    Toast.makeText(context, "📍 Ubicación GPS actual detectada en Tres Arroyos", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.setBuyerGpsLocation(
+                        lat = -38.3752,
+                        lng = -60.2783,
+                        addressHint = "Av. Moreno y Colón, Centro (Tres Arroyos CP 7500)"
+                    )
+                    Toast.makeText(context, "📍 Ubicación fijada en Tres Arroyos (CP 7500)", Toast.LENGTH_SHORT).show()
+                }
+            } catch (_: SecurityException) {
+                viewModel.setBuyerGpsLocation(lat = -38.3752, lng = -60.2783)
+            }
+        } else {
+            viewModel.setBuyerGpsLocation(lat = -38.3752, lng = -60.2783)
+            Toast.makeText(context, "📍 Ubicación fijada en Tres Arroyos (CP 7500)", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Column(
         modifier = modifier
@@ -197,7 +248,7 @@ fun CartAndCheckoutScreen(
                     Spacer(modifier = Modifier.height(20.dp))
                     Button(
                         onClick = { viewModel.navigateTo(AthenaScreen.CATALOG) },
-                        colors = ButtonDefaults.buttonColors(containerColor = AthenaGold, contentColor = ObsidianNight),
+                        colors = ButtonDefaults.buttonColors(containerColor = AthenaPink, contentColor = Color.White),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.testTag("explore_catalog_from_empty_cart_btn")
                     ) {
@@ -258,7 +309,7 @@ fun CartAndCheckoutScreen(
                                     val success = viewModel.applyCoupon(couponInput)
                                     couponError = !success
                                 },
-                                colors = ButtonDefaults.buttonColors(containerColor = ObsidianNight, contentColor = AthenaGold),
+                                colors = ButtonDefaults.buttonColors(containerColor = AthenaPink, contentColor = Color.White),
                                 shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier.testTag("apply_coupon_btn")
                             ) {
@@ -299,7 +350,7 @@ fun CartAndCheckoutScreen(
 
                 Button(
                     onClick = { viewModel.startCheckout() },
-                    colors = ButtonDefaults.buttonColors(containerColor = AthenaGold, contentColor = ObsidianNight),
+                    colors = ButtonDefaults.buttonColors(containerColor = AthenaPink, contentColor = Color.White),
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -321,7 +372,10 @@ fun CartAndCheckoutScreen(
                             customerName = customerName,
                             deliveryAddress = deliveryAddress,
                             deliveryCity = deliveryCity,
-                            deliveryNotes = deliveryNotes
+                            deliveryNotes = deliveryNotes,
+                            latitude = buyerLatitude,
+                            longitude = buyerLongitude,
+                            postalCode = postalCode
                         )
                         launchWhatsAppOrder(context, orderMsg, "5492983529883")
                         viewModel.processPayment()
@@ -341,14 +395,14 @@ fun CartAndCheckoutScreen(
         // STEP 2: ADDRESS & DELIVERY
         if (step == 2) {
             Text(
-                text = "Datos de Entrega Express",
+                text = "Datos de Entrega Express en Tres Arroyos",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Tu pedido será despachado en caja de lujo sellada con lacre de oro.",
+                text = "Tu pedido en Tres Arroyos (CP 7500) será despachado en caja de lujo sellada con lacre de oro.",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -375,13 +429,24 @@ fun CartAndCheckoutScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(
-                value = deliveryCity,
-                onValueChange = { viewModel.deliveryCity.value = it },
-                label = { Text("Ciudad / Municipio") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().testTag("address_city_input")
-            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = deliveryCity,
+                    onValueChange = { viewModel.deliveryCity.value = it },
+                    label = { Text("Ciudad / Provincia") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1.4f).testTag("address_city_input")
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedTextField(
+                    value = postalCode,
+                    onValueChange = { viewModel.postalCode.value = it },
+                    label = { Text("C.P.") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(0.8f).testTag("address_postal_code_input")
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -392,6 +457,84 @@ fun CartAndCheckoutScreen(
                 maxLines = 3,
                 modifier = Modifier.fillMaxWidth().testTag("address_notes_input")
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Card Google Maps de Tres Arroyos con GPS en tiempo real
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, WarmBorder),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.LocationOn, contentDescription = null, tint = AthenaGoldDark, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Google Maps: Tres Arroyos (CP 7500)",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            color = NeutralDark
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Vendedor: Athena_style • Celular: +54 9 2983 52-9883",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AthenaPinkDark
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = "Provincia de Buenos Aires • Lat: ${String.format(Locale.US, "%.4f", buyerLatitude)}, Lng: ${String.format(Locale.US, "%.4f", buyerLongitude)}",
+                        fontSize = 11.sp,
+                        color = NeutralMedium
+                    )
+                    if (isGpsLocationDetected) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "✓ Ubicación GPS actual de la compradora capturada",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = StatusSuccess
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                locationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = AthenaGold, contentColor = Color.White),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f).testTag("detect_gps_location_btn")
+                        ) {
+                            Icon(Icons.Default.MyLocation, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Detectar GPS Actual", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Button(
+                            onClick = {
+                                val mapUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=$buyerLatitude,$buyerLongitude")
+                                val mapIntent = Intent(Intent.ACTION_VIEW, mapUri)
+                                context.startActivity(mapIntent)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF2ECE8), contentColor = NeutralDark),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f).testTag("open_google_maps_btn")
+                        ) {
+                            Icon(Icons.Default.Map, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Ver en Maps", fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -410,13 +553,13 @@ fun CartAndCheckoutScreen(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(AthenaGold)
+                            .background(AthenaPink.copy(alpha = 0.15f))
                     ) {
-                        Icon(Icons.Default.LocalShipping, contentDescription = null, tint = ObsidianNight, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.LocalShipping, contentDescription = null, tint = AthenaPinkDark, modifier = Modifier.size(20.dp))
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Envío VIP Express Athena", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text("Envío VIP Express en Tres Arroyos", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         Text("Entrega garantizada en menos de 45 minutos", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Text("GRATIS", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = StatusSuccess)
@@ -437,7 +580,7 @@ fun CartAndCheckoutScreen(
                 Spacer(modifier = Modifier.width(12.dp))
                 Button(
                     onClick = { viewModel.proceedToPayment() },
-                    colors = ButtonDefaults.buttonColors(containerColor = AthenaGold, contentColor = ObsidianNight),
+                    colors = ButtonDefaults.buttonColors(containerColor = AthenaPink, contentColor = Color.White),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.weight(1.5f).height(50.dp).testTag("proceed_to_payment_btn")
                 ) {
@@ -466,6 +609,13 @@ fun CartAndCheckoutScreen(
             // Payment method selector
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 PaymentMethodOption(
+                    title = "💵 Pago en Efectivo (Contra Entrega)",
+                    subtitle = "Abonás en mano al recibir el pedido en Tres Arroyos (con cambio)",
+                    icon = Icons.Default.Payments,
+                    isSelected = selectedPaymentType == PaymentType.CASH,
+                    onClick = { viewModel.selectedPaymentType.value = PaymentType.CASH }
+                )
+                PaymentMethodOption(
                     title = "Tarjeta de Crédito / Débito",
                     subtitle = "Visa, Mastercard, American Express",
                     icon = Icons.Default.CreditCard,
@@ -481,7 +631,7 @@ fun CartAndCheckoutScreen(
                 )
                 PaymentMethodOption(
                     title = "PSE / Transferencia Bancaria",
-                    subtitle = "Débito bancario desde cualquier cuenta en Colombia",
+                    subtitle = "Transferencia bancaria protegida",
                     icon = Icons.Default.AccountBalance,
                     isSelected = selectedPaymentType == PaymentType.PSE,
                     onClick = { viewModel.selectedPaymentType.value = PaymentType.PSE }
@@ -490,8 +640,60 @@ fun CartAndCheckoutScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Interactive Luxury Card Visualizer (when Credit Card is chosen)
-            if (selectedPaymentType == PaymentType.CREDIT_CARD) {
+            // Payment visualizer depending on chosen method
+            if (selectedPaymentType == PaymentType.CASH) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, AthenaGold),
+                    modifier = Modifier.fillMaxWidth().testTag("cash_payment_details_card")
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("💵", fontSize = 24.sp)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "Pagar en Efectivo al Recibir",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "Contra entrega en Tres Arroyos (CP 7500)",
+                                    fontSize = 11.sp,
+                                    color = AthenaGoldDark,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = "Abonás el monto exacto de $${String.format(Locale.US, "%.2f", total)} en mano en efectivo cuando el repartidor de Athena Style te entregue tu pedido en tu domicilio.",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = StatusSuccess, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Sin recargos • Pagás en mano • Cambio disponible",
+                                fontSize = 11.sp,
+                                color = StatusSuccess,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Vendedor: Athena_style • Celular: +54 9 2983 52-9883",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = AthenaPink
+                        )
+                    }
+                }
+            } else if (selectedPaymentType == PaymentType.CREDIT_CARD) {
                 LuxuryCreditCardView(
                     cardNumber = cardNumber,
                     cardHolder = cardHolder,
@@ -596,7 +798,10 @@ fun CartAndCheckoutScreen(
                         deliveryAddress = deliveryAddress,
                         deliveryCity = deliveryCity,
                         deliveryNotes = deliveryNotes,
-                        paymentMethod = selectedPaymentType.displayName
+                        paymentMethod = selectedPaymentType.displayName,
+                        latitude = buyerLatitude,
+                        longitude = buyerLongitude,
+                        postalCode = postalCode
                     )
                     launchWhatsAppOrder(context, orderMsg, "5492983529883")
                     viewModel.processPayment()
@@ -632,6 +837,8 @@ fun CartAndCheckoutScreen(
         // STEP 4: PAYMENT SUCCESS & INSTANT TRACKING ENTRY
         if (step == 4 && lastCompletedOrder != null) {
             val order = lastCompletedOrder!!
+            val currentTrackedOrder = orders.find { it.orderId == order.orderId } ?: order
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -667,7 +874,7 @@ fun CartAndCheckoutScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Tu compra en Athena Style ha sido confirmada.",
+                    text = "Tu compra en Athena Style ha sido confirmada en Tres Arroyos (CP 7500).",
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -744,7 +951,7 @@ fun CartAndCheckoutScreen(
                                 color = Color(0xFF1E7E34)
                             )
                             Text(
-                                text = "El mensaje con el detalle de prendas y entrega está listo.",
+                                text = "El mensaje con prendas y link de Google Maps Tres Arroyos está listo.",
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -766,7 +973,10 @@ fun CartAndCheckoutScreen(
                             deliveryAddress = order.deliveryAddress,
                             deliveryCity = order.deliveryCity,
                             deliveryNotes = order.deliveryNotes,
-                            paymentMethod = order.paymentMethodName
+                            paymentMethod = order.paymentMethodName,
+                            latitude = order.latitude,
+                            longitude = order.longitude,
+                            postalCode = order.postalCode
                         )
                         launchWhatsAppOrder(context, orderMsg, "5492983529883")
                     },
@@ -784,12 +994,32 @@ fun CartAndCheckoutScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
+                // MAPA DE TRES ARROYOS CON TIEMPO REAL & BOTÓN ACEPTAR PEDIDO
+                ShippingMapVisualizer(
+                    progress = currentTrackedOrder.courierProgress,
+                    status = currentTrackedOrder.status,
+                    courierName = currentTrackedOrder.courierName,
+                    estimatedMinutes = currentTrackedOrder.estimatedMinutes,
+                    destinationAddress = currentTrackedOrder.deliveryAddress,
+                    remainingDistanceKm = currentTrackedOrder.remainingDistanceKm,
+                    latitude = currentTrackedOrder.latitude,
+                    longitude = currentTrackedOrder.longitude,
+                    isAccepted = currentTrackedOrder.isOrderAccepted,
+                    courierStatusText = currentTrackedOrder.courierStatusText,
+                    onAcceptOrder = {
+                        viewModel.acceptOrderAndStartDelivery(order.orderId)
+                    },
+                    modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 Button(
                     onClick = {
                         viewModel.selectActiveOrder(order.orderId)
                         onNavigateToTracking(order.orderId)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = AthenaGold, contentColor = ObsidianNight),
+                    colors = ButtonDefaults.buttonColors(containerColor = AthenaPink, contentColor = Color.White),
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -798,7 +1028,7 @@ fun CartAndCheckoutScreen(
                 ) {
                     Icon(Icons.Default.LocalShipping, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Ver Seguimiento en Tiempo Real", fontWeight = FontWeight.Bold)
+                    Text("Ver Seguimiento en Pantalla Completa", fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -1112,7 +1342,8 @@ private fun LuxuryCreditCardView(
 }
 
 /**
- * Formats a clear, organized WhatsApp order message with products, quantities, sizes, prices and delivery info.
+ * Formats a clear, organized WhatsApp order message with products, quantities, sizes, prices,
+ * Tres Arroyos (CP 7500) delivery info and real Google Maps link of buyer's location.
  */
 fun formatWhatsAppOrderMessage(
     orderId: String? = null,
@@ -1124,7 +1355,10 @@ fun formatWhatsAppOrderMessage(
     deliveryAddress: String,
     deliveryCity: String,
     deliveryNotes: String,
-    paymentMethod: String? = null
+    paymentMethod: String? = null,
+    latitude: Double = -38.3752,
+    longitude: Double = -60.2783,
+    postalCode: String = "7500"
 ): String {
     val sb = StringBuilder()
     sb.append("🛍️ *¡Hola Athena Style! Quiero finalizar mi compra:*\n\n")
@@ -1153,15 +1387,23 @@ fun formatWhatsAppOrderMessage(
     sb.append("• *TOTAL A PAGAR: $${String.format(Locale.US, "%.2f", total)}*\n\n")
 
     if (customerName.isNotBlank() || deliveryAddress.isNotBlank()) {
-        sb.append("📍 *Datos de Entrega:*\n")
+        sb.append("📍 *Datos de Entrega en Tres Arroyos:*\n")
         if (customerName.isNotBlank()) sb.append("• Destinatario: $customerName\n")
         if (deliveryAddress.isNotBlank()) sb.append("• Dirección: $deliveryAddress\n")
-        if (deliveryCity.isNotBlank()) sb.append("• Ciudad: $deliveryCity\n")
+        if (deliveryCity.isNotBlank()) sb.append("• Ciudad: $deliveryCity (CP $postalCode)\n")
         if (deliveryNotes.isNotBlank()) sb.append("• Referencia: $deliveryNotes\n")
+        sb.append("🗺️ *Google Maps Ubicación Actual de la Compradora:*\n")
+        sb.append("https://www.google.com/maps/search/?api=1&query=")
+        sb.append(String.format(Locale.US, "%.5f", latitude)).append(",")
+        sb.append(String.format(Locale.US, "%.5f", longitude)).append("\n")
+        sb.append("(Tres Arroyos, Provincia de Buenos Aires, Código Postal $postalCode)\n")
     }
     if (!paymentMethod.isNullOrBlank()) {
-        sb.append("• Forma de pago: $paymentMethod\n")
+        sb.append("💳 *Forma de pago:* $paymentMethod\n")
     }
+
+    sb.append("🏪 *Vendedor:* Athena_style\n")
+    sb.append("📱 *Celular Vendedor:* +54 9 2983 52-9883\n")
 
     sb.append("\n_Enviado desde Athena_Style_ ✨")
     return sb.toString()

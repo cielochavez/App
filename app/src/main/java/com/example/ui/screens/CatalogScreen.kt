@@ -78,15 +78,21 @@ import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.ui.text.style.TextDecoration
 import com.example.model.ProductColor
 import com.example.ui.components.PriceEditDialog
+import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
+import com.example.ui.theme.AthenaGoldLight
 import java.util.Locale
 import com.example.model.Product
 import com.example.model.ProductCategory
 import com.example.model.RebajasImageSlot
 import com.example.ui.components.ProductCard
 import com.example.ui.theme.AthenaPink
+import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.CrimsonSale
+import com.example.ui.theme.NeutralDark
+import com.example.ui.theme.NeutralMedium
 import com.example.ui.theme.ObsidianNight
+import com.example.ui.theme.WarmBorder
 import com.example.viewmodel.AthenaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -162,9 +168,9 @@ fun CatalogScreen(
         item {
             Card(
                 shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF14121E)),
-                border = BorderStroke(1.2.dp, AthenaPink.copy(alpha = 0.6f)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFBF8F6)),
+                border = BorderStroke(1.dp, WarmBorder),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("catalog_main_menu_card")
@@ -180,7 +186,7 @@ fun CatalogScreen(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.5.sp,
-                            color = AthenaPink
+                            color = AthenaPinkDark
                         )
 
                         // Pequeño acceso para ver todo
@@ -188,7 +194,7 @@ fun CatalogScreen(
                             text = if (selectedCategory == ProductCategory.ALL) "• Viendo Todo •" else "Ver Todo",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (selectedCategory == ProductCategory.ALL) AthenaPink else Color.White.copy(alpha = 0.6f),
+                            color = if (selectedCategory == ProductCategory.ALL) AthenaPinkDark else NeutralMedium,
                             modifier = Modifier
                                 .clickable {
                                     viewModel.selectedCategory.value = ProductCategory.ALL
@@ -211,10 +217,10 @@ fun CatalogScreen(
                                 viewModel.openMenuSection(ProductCategory.REBAJAS)
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isRebajas) CrimsonSale else Color(0xFF222030),
-                                contentColor = Color.White
+                                containerColor = if (isRebajas) CrimsonSale else Color(0xFFF2ECE8),
+                                contentColor = if (isRebajas) Color.White else NeutralDark
                             ),
-                            border = BorderStroke(1.2.dp, if (isRebajas) CrimsonSale else Color.Transparent),
+                            border = BorderStroke(1.dp, if (isRebajas) CrimsonSale else Color.Transparent),
                             shape = RoundedCornerShape(12.dp),
                             contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                             modifier = Modifier
@@ -236,10 +242,10 @@ fun CatalogScreen(
                                 viewModel.openMenuSection(ProductCategory.ADIDAS)
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isAdidas) AthenaPink else Color(0xFF222030),
-                                contentColor = if (isAdidas) Color.Black else AthenaPink
+                                containerColor = if (isAdidas) AthenaPink else Color(0xFFF2ECE8),
+                                contentColor = if (isAdidas) Color.White else NeutralDark
                             ),
-                            border = BorderStroke(1.2.dp, if (isAdidas) AthenaPink else Color.Transparent),
+                            border = BorderStroke(1.dp, if (isAdidas) AthenaPink else Color.Transparent),
                             shape = RoundedCornerShape(12.dp),
                             contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                             modifier = Modifier
@@ -261,10 +267,10 @@ fun CatalogScreen(
                                 viewModel.openMenuSection(ProductCategory.SETS)
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isConjuntos) Color.White else Color(0xFF222030),
-                                contentColor = if (isConjuntos) Color(0xFF14121E) else Color.White
+                                containerColor = if (isConjuntos) AthenaGoldDark else Color(0xFFF2ECE8),
+                                contentColor = if (isConjuntos) Color.White else NeutralDark
                             ),
-                            border = BorderStroke(1.2.dp, if (isConjuntos) Color.White else Color.Transparent),
+                            border = BorderStroke(1.dp, if (isConjuntos) AthenaGoldDark else Color.Transparent),
                             shape = RoundedCornerShape(12.dp),
                             contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                             modifier = Modifier
@@ -294,7 +300,7 @@ fun CatalogScreen(
             item {
                 Card(
                     shape = RoundedCornerShape(22.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("portada_rebajas_banner_card")
@@ -303,7 +309,7 @@ fun CatalogScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
-                            .background(Color(0xFF0F0E16))
+                            .background(Color(0xFFFFF7F9))
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.banner_portada_rebajas),
@@ -351,7 +357,7 @@ fun CatalogScreen(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 letterSpacing = 1.sp,
-                                color = AthenaPink
+                                color = AthenaPinkDark
                             )
                             Text(
                                 text = "Sube fotos de prendas de rebajas desde tu galería.",
@@ -374,14 +380,14 @@ fun CatalogScreen(
                                 modifier = Modifier
                                     .size(34.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF222030))
-                                    .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                    .background(Color(0xFFF2ECE8))
+                                    .border(1.dp, WarmBorder, CircleShape)
                                     .testTag("rebajas_header_arrow_prev")
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Correr fotos izquierda",
-                                    tint = Color.White,
+                                    tint = NeutralDark,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
@@ -394,14 +400,14 @@ fun CatalogScreen(
                                 modifier = Modifier
                                     .size(34.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF222030))
-                                    .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                    .background(Color(0xFFF2ECE8))
+                                    .border(1.dp, WarmBorder, CircleShape)
                                     .testTag("rebajas_header_arrow_next")
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = "Correr fotos derecha",
-                                    tint = Color.White,
+                                    tint = NeutralDark,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
@@ -421,11 +427,11 @@ fun CatalogScreen(
                             // Tarjeta + Subir Foto de Prenda
                             Card(
                                 shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
                                 modifier = Modifier
                                     .width(260.dp)
                                     .height(290.dp)
-                                    .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
+                                    .border(1.5.dp, AthenaPink, RoundedCornerShape(20.dp))
                                     .clickable {
                                         activeSlotType = "rebajas"
                                         activeTargetSlotId = null
@@ -447,7 +453,7 @@ fun CatalogScreen(
                                         modifier = Modifier
                                             .size(64.dp)
                                             .clip(CircleShape)
-                                            .background(AthenaPink.copy(alpha = 0.2f))
+                                            .background(AthenaPink.copy(alpha = 0.15f))
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.AddPhotoAlternate,
@@ -461,14 +467,14 @@ fun CatalogScreen(
                                         text = "+ Subir Foto de Prenda",
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = AthenaPink,
+                                        color = AthenaPinkDark,
                                         textAlign = TextAlign.Center
                                     )
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
                                         text = "Elige de tu galería",
                                         fontSize = 12.sp,
-                                        color = Color.White.copy(alpha = 0.75f),
+                                        color = NeutralMedium,
                                         textAlign = TextAlign.Center
                                     )
                                 }
@@ -510,14 +516,14 @@ fun CatalogScreen(
                                 .padding(start = 2.dp)
                                 .size(42.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                .background(Color.White.copy(alpha = 0.95f))
                                 .border(1.5.dp, AthenaPink, CircleShape)
                                 .testTag("rebajas_side_arrow_prev")
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Correr foto anterior",
-                                tint = Color.White,
+                                tint = AthenaPinkDark,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -533,19 +539,60 @@ fun CatalogScreen(
                                 .padding(end = 2.dp)
                                 .size(42.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                .background(Color.White.copy(alpha = 0.95f))
                                 .border(1.5.dp, AthenaPink, CircleShape)
                                 .testTag("rebajas_side_arrow_next")
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = "Correr foto siguiente",
-                                tint = Color.White,
+                                tint = AthenaPinkDark,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
                     }
                 }
+            }
+
+            // Fotos de Rebajas en desplazamiento vertical continuo
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 4.dp)
+                ) {
+                    Text(
+                        text = "FOTOS REBAJAS EN DESPLAZAMIENTO VERTICAL ↕️",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp,
+                        color = AthenaPink
+                    )
+                }
+            }
+
+            items(rebajasSlots, key = { "vert_reb_" + it.id }) { slot ->
+                LargePhotoSlotCard(
+                    slot = slot,
+                    onUploadClick = {
+                        activeSlotType = "rebajas"
+                        activeTargetSlotId = slot.id
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                    onRemoveClick = {
+                        viewModel.removeRebajasSlot(slot.id)
+                    },
+                    onEditPriceClick = {
+                        slotForPriceEdit = slot
+                    },
+                    onAddToCartClick = {
+                        viewModel.addSlotToCart(slot)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
 
@@ -554,8 +601,9 @@ fun CatalogScreen(
             item {
                 Card(
                     shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF14131D)),
-                    border = BorderStroke(1.5.dp, AthenaPink),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, WarmBorder),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("adidas_collection_header_card")
@@ -575,13 +623,13 @@ fun CatalogScreen(
                                     text = "👟 COLECCIÓN ADIDAS",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Black,
-                                    color = Color.White
+                                    color = NeutralDark
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "Campera de Jean 3 Tiras & Conjunto 3 Piezas",
                                     fontSize = 12.sp,
-                                    color = Color.White.copy(alpha = 0.75f)
+                                    color = NeutralMedium
                                 )
                             }
 
@@ -595,7 +643,7 @@ fun CatalogScreen(
                                     text = "ORIGINALS",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Black,
-                                    color = Color.Black
+                                    color = Color.White
                                 )
                             }
                         }
@@ -614,7 +662,7 @@ fun CatalogScreen(
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     letterSpacing = 1.sp,
-                                    color = AthenaPink
+                                    color = AthenaPinkDark
                                 )
                                 Text(
                                     text = "Toca cualquier espacio para subir fotos de prendas Adidas.",
@@ -636,37 +684,37 @@ fun CatalogScreen(
                                     modifier = Modifier
                                         .size(34.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF222030))
-                                        .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                        .background(Color(0xFFF2ECE8))
+                                        .border(1.dp, WarmBorder, CircleShape)
                                         .testTag("adidas_header_arrow_prev")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Correr fotos izquierda",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                                IconButton(
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            adidasScrollState.animateScrollBy(600f)
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .size(34.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(0xFF222030))
-                                        .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
-                                        .testTag("adidas_header_arrow_next")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = "Correr fotos derecha",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
+                                 ) {
+                                     Icon(
+                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                         contentDescription = "Correr fotos izquierda",
+                                         tint = NeutralDark,
+                                         modifier = Modifier.size(16.dp)
+                                     )
+                                 }
+                                 IconButton(
+                                     onClick = {
+                                         coroutineScope.launch {
+                                             adidasScrollState.animateScrollBy(600f)
+                                         }
+                                     },
+                                     modifier = Modifier
+                                         .size(34.dp)
+                                         .clip(CircleShape)
+                                         .background(Color(0xFFF2ECE8))
+                                         .border(1.dp, WarmBorder, CircleShape)
+                                         .testTag("adidas_header_arrow_next")
+                                 ) {
+                                     Icon(
+                                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                         contentDescription = "Correr fotos derecha",
+                                         tint = NeutralDark,
+                                         modifier = Modifier.size(16.dp)
+                                     )
+                                 }
                             }
                         }
 
@@ -682,11 +730,11 @@ fun CatalogScreen(
                                 // Tarjeta + Subir Foto Adidas
                                 Card(
                                     shape = RoundedCornerShape(20.dp),
-                                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White),
                                     modifier = Modifier
                                         .width(260.dp)
                                         .height(290.dp)
-                                        .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
+                                        .border(1.5.dp, AthenaPink, RoundedCornerShape(20.dp))
                                         .clickable {
                                             activeSlotType = "adidas"
                                             activeTargetSlotId = null
@@ -708,7 +756,7 @@ fun CatalogScreen(
                                             modifier = Modifier
                                                 .size(64.dp)
                                                 .clip(CircleShape)
-                                                .background(AthenaPink.copy(alpha = 0.2f))
+                                                .background(AthenaPink.copy(alpha = 0.15f))
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.AddPhotoAlternate,
@@ -722,14 +770,14 @@ fun CatalogScreen(
                                             text = "+ Subir Foto Adidas",
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.ExtraBold,
-                                            color = AthenaPink,
+                                            color = AthenaPinkDark,
                                             textAlign = TextAlign.Center
                                         )
                                         Spacer(modifier = Modifier.height(6.dp))
                                         Text(
                                             text = "Elige de tu galería",
                                             fontSize = 12.sp,
-                                            color = Color.White.copy(alpha = 0.75f),
+                                            color = NeutralMedium,
                                             textAlign = TextAlign.Center
                                         )
                                     }
@@ -771,14 +819,14 @@ fun CatalogScreen(
                                     .padding(start = 2.dp)
                                     .size(42.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                    .background(Color.White.copy(alpha = 0.95f))
                                     .border(1.5.dp, AthenaPink, CircleShape)
                                     .testTag("adidas_side_arrow_prev")
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Correr foto anterior",
-                                    tint = Color.White,
+                                    tint = AthenaPinkDark,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -794,20 +842,61 @@ fun CatalogScreen(
                                     .padding(end = 2.dp)
                                     .size(42.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                    .background(Color.White.copy(alpha = 0.95f))
                                     .border(1.5.dp, AthenaPink, CircleShape)
                                     .testTag("adidas_side_arrow_next")
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = "Correr foto siguiente",
-                                    tint = Color.White,
+                                    tint = AthenaPinkDark,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
                     }
                 }
+            }
+
+            // Fotos Adidas en desplazamiento vertical continuo
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 4.dp)
+                ) {
+                    Text(
+                        text = "FOTOS ADIDAS EN DESPLAZAMIENTO VERTICAL ↕️",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp,
+                        color = AthenaPink
+                    )
+                }
+            }
+
+            items(adidasSlots, key = { "vert_adi_" + it.id }) { slot ->
+                LargePhotoSlotCard(
+                    slot = slot,
+                    onUploadClick = {
+                        activeSlotType = "adidas"
+                        activeTargetSlotId = slot.id
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                    onRemoveClick = {
+                        viewModel.removeAdidasSlot(slot.id)
+                    },
+                    onEditPriceClick = {
+                        slotForPriceEdit = slot
+                    },
+                    onAddToCartClick = {
+                        viewModel.addSlotToCart(slot)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
 
@@ -816,8 +905,9 @@ fun CatalogScreen(
             item {
                 Card(
                     shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF14121E)),
-                    border = BorderStroke(1.2.dp, Color.White.copy(alpha = 0.5f)),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, WarmBorder),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("conjuntos_header_card")
@@ -837,13 +927,13 @@ fun CatalogScreen(
                                     text = "✨ COLECCIÓN SET MALIBÚ & CONJUNTOS",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Black,
-                                    color = Color.White
+                                    color = NeutralDark
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "Top halter con cierre frontal & pantalón flare oxford en 3 tonos",
                                     fontSize = 12.sp,
-                                    color = Color.White.copy(alpha = 0.75f)
+                                    color = NeutralMedium
                                 )
                             }
 
@@ -854,7 +944,7 @@ fun CatalogScreen(
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = AthenaPink,
-                                    contentColor = Color.Black
+                                    contentColor = Color.White
                                 ),
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.testTag("btn_adidas_inside_conjuntos")
@@ -881,7 +971,7 @@ fun CatalogScreen(
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     letterSpacing = 1.sp,
-                                    color = AthenaPink
+                                    color = AthenaPinkDark
                                 )
                                 Text(
                                     text = "Fotos reales del Set Malibú en celeste, rosa y marrón chocolate.",
@@ -904,14 +994,14 @@ fun CatalogScreen(
                                     modifier = Modifier
                                         .size(34.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF222030))
-                                        .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                        .background(Color(0xFFF2ECE8))
+                                        .border(1.dp, WarmBorder, CircleShape)
                                         .testTag("conjuntos_header_arrow_prev")
                                 ) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                         contentDescription = "Correr fotos izquierda",
-                                        tint = Color.White,
+                                        tint = NeutralDark,
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }
@@ -924,14 +1014,14 @@ fun CatalogScreen(
                                     modifier = Modifier
                                         .size(34.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF222030))
-                                        .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                        .background(Color(0xFFF2ECE8))
+                                        .border(1.dp, WarmBorder, CircleShape)
                                         .testTag("conjuntos_header_arrow_next")
                                 ) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                         contentDescription = "Correr fotos derecha",
-                                        tint = Color.White,
+                                        tint = NeutralDark,
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }
@@ -950,11 +1040,11 @@ fun CatalogScreen(
                                 // Tarjeta + Subir Foto Conjunto
                                 Card(
                                     shape = RoundedCornerShape(20.dp),
-                                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White),
                                     modifier = Modifier
                                         .width(260.dp)
                                         .height(290.dp)
-                                        .border(2.dp, AthenaPink, RoundedCornerShape(20.dp))
+                                        .border(1.5.dp, AthenaPink, RoundedCornerShape(20.dp))
                                         .clickable {
                                             activeSlotType = "conjuntos"
                                             activeTargetSlotId = null
@@ -976,7 +1066,7 @@ fun CatalogScreen(
                                             modifier = Modifier
                                                 .size(64.dp)
                                                 .clip(CircleShape)
-                                                .background(AthenaPink.copy(alpha = 0.2f))
+                                                .background(AthenaPink.copy(alpha = 0.15f))
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.AddPhotoAlternate,
@@ -990,14 +1080,14 @@ fun CatalogScreen(
                                             text = "+ Subir Foto Conjunto",
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.ExtraBold,
-                                            color = AthenaPink,
+                                            color = AthenaPinkDark,
                                             textAlign = TextAlign.Center
                                         )
                                         Spacer(modifier = Modifier.height(6.dp))
                                         Text(
                                             text = "Elige de tu galería",
                                             fontSize = 12.sp,
-                                            color = Color.White.copy(alpha = 0.75f),
+                                            color = NeutralMedium,
                                             textAlign = TextAlign.Center
                                         )
                                     }
@@ -1039,14 +1129,14 @@ fun CatalogScreen(
                                     .padding(start = 2.dp)
                                     .size(42.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                    .background(Color.White.copy(alpha = 0.95f))
                                     .border(1.5.dp, AthenaPink, CircleShape)
                                     .testTag("conjuntos_side_arrow_prev")
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Correr foto anterior",
-                                    tint = Color.White,
+                                    tint = AthenaPinkDark,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -1062,20 +1152,61 @@ fun CatalogScreen(
                                     .padding(end = 2.dp)
                                     .size(42.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF14121E).copy(alpha = 0.88f))
+                                    .background(Color.White.copy(alpha = 0.95f))
                                     .border(1.5.dp, AthenaPink, CircleShape)
                                     .testTag("conjuntos_side_arrow_next")
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = "Correr foto siguiente",
-                                    tint = Color.White,
+                                    tint = AthenaPinkDark,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
                     }
                 }
+            }
+
+            // Fotos Set Malibú & Conjuntos en desplazamiento vertical continuo
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 4.dp)
+                ) {
+                    Text(
+                        text = "FOTOS SET MALIBÚ EN DESPLAZAMIENTO VERTICAL ↕️",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp,
+                        color = AthenaPink
+                    )
+                }
+            }
+
+            items(conjuntosSlots, key = { "vert_conj_" + it.id }) { slot ->
+                LargePhotoSlotCard(
+                    slot = slot,
+                    onUploadClick = {
+                        activeSlotType = "conjuntos"
+                        activeTargetSlotId = slot.id
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                    onRemoveClick = {
+                        viewModel.removeConjuntosSlot(slot.id)
+                    },
+                    onEditPriceClick = {
+                        slotForPriceEdit = slot
+                    },
+                    onAddToCartClick = {
+                        viewModel.addSlotToCart(slot)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
 
@@ -1137,7 +1268,7 @@ fun CatalogScreen(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 1.sp,
-                color = Color.White
+                color = NeutralDark
             )
         }
 
@@ -1195,14 +1326,15 @@ private fun LargePhotoSlotCard(
     onUploadClick: () -> Unit,
     onRemoveClick: () -> Unit,
     onEditPriceClick: () -> Unit,
-    onAddToCartClick: () -> Unit
+    onAddToCartClick: () -> Unit,
+    modifier: Modifier = Modifier.width(280.dp)
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        modifier = Modifier
-            .width(280.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, WarmBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = modifier
             .wrapContentHeight()
             .clip(RoundedCornerShape(20.dp))
             .clickable {
@@ -1219,10 +1351,10 @@ private fun LargePhotoSlotCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(290.dp)
-                    .background(Color(0xFF14131D))
+                    .background(Color(0xFFFAF7F8))
                     .border(
-                        1.5.dp,
-                        AthenaPink.copy(alpha = 0.4f),
+                        1.dp,
+                        AthenaPink.copy(alpha = 0.35f),
                         RoundedCornerShape(20.dp)
                     )
                     .padding(16.dp)
@@ -1252,7 +1384,7 @@ private fun LargePhotoSlotCard(
                         text = slot.title,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = NeutralDark,
                         textAlign = TextAlign.Center
                     )
 
@@ -1261,7 +1393,7 @@ private fun LargePhotoSlotCard(
                     Text(
                         text = slot.subtitle ?: "Toca para agregar foto",
                         fontSize = 12.sp,
-                        color = AthenaPink,
+                        color = AthenaPinkDark,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -1273,7 +1405,7 @@ private fun LargePhotoSlotCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(220.dp)
-                        .background(Color(0xFF0F0E16))
+                        .background(Color(0xFFEDE8E0))
                 ) {
                     if (slot.imageUri != null) {
                         Image(
@@ -1342,7 +1474,7 @@ private fun LargePhotoSlotCard(
                         text = slot.title,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = NeutralDark,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1350,7 +1482,7 @@ private fun LargePhotoSlotCard(
                         Text(
                             text = it,
                             fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.7f),
+                            color = NeutralMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -1378,7 +1510,7 @@ private fun LargePhotoSlotCard(
                                     text = "$${String.format(Locale.US, "%.2f", slot.originalPrice)}",
                                     fontSize = 12.sp,
                                     textDecoration = TextDecoration.LineThrough,
-                                    color = Color.White.copy(alpha = 0.5f)
+                                    color = NeutralMedium
                                 )
                             }
                         }

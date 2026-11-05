@@ -44,6 +44,9 @@ import com.example.ui.theme.AthenaPink
 import com.example.ui.theme.CrimsonSale
 import com.example.ui.theme.ObsidianNight
 
+import androidx.compose.foundation.border
+import com.example.ui.theme.WarmBorder
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AthenaTopBar(
@@ -85,7 +88,8 @@ fun AthenaTopBar(
                         .padding(start = 12.dp)
                         .size(38.dp)
                         .clip(CircleShape)
-                        .background(ObsidianNight)
+                        .background(Color(0xFFFFF7F9))
+                        .border(1.dp, WarmBorder, CircleShape)
                         .clickable { onLogoClick() }
                 ) {
                     Image(

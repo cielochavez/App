@@ -10,32 +10,32 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = AthenaGold,
-    onPrimary = ObsidianNight,
-    primaryContainer = AthenaGoldContainer,
-    onPrimaryContainer = AthenaGoldLight,
-    secondary = RoseBronze,
+private val DarkColorScheme = lightColorScheme(
+    primary = AthenaPink,
+    onPrimary = PureWhite,
+    primaryContainer = AthenaPinkLight,
+    onPrimaryContainer = NeutralDark,
+    secondary = AthenaGoldDark,
     onSecondary = PureWhite,
-    tertiary = OliveLaurel,
-    background = ObsidianNight,
-    onBackground = AlabasterCream,
-    surface = ObsidianSurface,
-    onSurface = AlabasterCream,
-    surfaceVariant = ObsidianCard,
-    onSurfaceVariant = AthenaGoldLight,
-    outline = AthenaGoldDark
+    tertiary = RoseBronze,
+    background = PureWhite,
+    onBackground = NeutralDark,
+    surface = PureWhite,
+    onSurface = NeutralDark,
+    surfaceVariant = SilkCard,
+    onSurfaceVariant = NeutralMedium,
+    outline = WarmBorder
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = AthenaGoldDark,
+    primary = AthenaPink,
     onPrimary = PureWhite,
-    primaryContainer = AthenaGoldLight,
-    onPrimaryContainer = ObsidianNight,
-    secondary = RoseBronze,
+    primaryContainer = AthenaPinkLight,
+    onPrimaryContainer = NeutralDark,
+    secondary = AthenaGoldDark,
     onSecondary = PureWhite,
-    tertiary = OliveLaurel,
-    background = AlabasterCream,
+    tertiary = RoseBronze,
+    background = PureWhite,
     onBackground = NeutralDark,
     surface = PureWhite,
     onSurface = NeutralDark,
@@ -46,18 +46,11 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AthenaStyleTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Keep signature boutique palette consistent
+    darkTheme: Boolean = false, // Fondo blanco boutique activo por defecto
+    dynamicColor: Boolean = false, // Mantener paleta boutique delicada consistente
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

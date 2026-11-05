@@ -59,6 +59,7 @@ import com.example.data.local.WishlistItem
 import com.example.model.Product
 import com.example.model.ProductColor
 import com.example.model.getDrawableResId
+import androidx.compose.foundation.BorderStroke
 import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
 import com.example.ui.theme.AthenaPink
@@ -66,6 +67,7 @@ import com.example.ui.theme.CrimsonSale
 import com.example.ui.theme.ObsidianNight
 import com.example.ui.theme.RoseBronze
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.WarmBorder
 import com.example.viewmodel.AthenaScreen
 import com.example.viewmodel.AthenaViewModel
 import java.util.Locale
@@ -93,6 +95,7 @@ fun WishlistScreen(
         item {
             Card(
                 shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.2.dp, WarmBorder),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
                 modifier = Modifier
@@ -236,8 +239,8 @@ fun WishlistScreen(
                         Button(
                             onClick = { viewModel.navigateTo(AthenaScreen.CATALOG) },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = AthenaGold,
-                                contentColor = ObsidianNight
+                                containerColor = AthenaPink,
+                                contentColor = Color.White
                             ),
                             shape = RoundedCornerShape(14.dp),
                             modifier = Modifier.testTag("explore_catalog_from_wishlist_btn")
@@ -316,6 +319,7 @@ private fun WishlistItemRow(
 ) {
     Card(
         shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.2.dp, WarmBorder),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
@@ -439,8 +443,8 @@ private fun WishlistItemRow(
                     Button(
                         onClick = onAddToCart,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = AthenaGold,
-                            contentColor = ObsidianNight
+                            containerColor = AthenaPink,
+                            contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(10.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),

@@ -72,12 +72,16 @@ import com.example.R
 import com.example.model.Product
 import com.example.model.ProductCategory
 import com.example.model.getDrawableResId
+import androidx.compose.foundation.BorderStroke
 import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
+import com.example.ui.theme.AthenaPink
+import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.CrimsonSale
 import com.example.ui.theme.ObsidianNight
 import com.example.ui.theme.StatusSuccess
 import com.example.ui.theme.StatusWarning
+import com.example.ui.theme.WarmBorder
 import com.example.viewmodel.AthenaViewModel
 import java.util.Locale
 
@@ -117,8 +121,8 @@ fun InventoryManagementScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                containerColor = AthenaGold,
-                contentColor = ObsidianNight,
+                containerColor = AthenaPink,
+                contentColor = Color.White,
                 modifier = Modifier
                     .padding(bottom = 80.dp)
                     .testTag("add_product_inventory_fab")
@@ -236,13 +240,13 @@ fun InventoryManagementScreen(
                             onClick = { activeFilter = filter },
                             label = { Text(filter.label, fontSize = 11.sp) },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = ObsidianNight,
-                                selectedLabelColor = AthenaGold
+                                selectedContainerColor = AthenaPink,
+                                selectedLabelColor = Color.White
                             ),
                             border = FilterChipDefaults.filterChipBorder(
                                 enabled = true,
                                 selected = isSelected,
-                                borderColor = if (isSelected) AthenaGold else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                                borderColor = if (isSelected) AthenaPink else WarmBorder
                             )
                         )
                     }
@@ -358,7 +362,7 @@ fun InventoryManagementScreen(
                             showAddDialog = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = AthenaGold, contentColor = ObsidianNight),
+                    colors = ButtonDefaults.buttonColors(containerColor = AthenaPink, contentColor = Color.White),
                     modifier = Modifier.testTag("confirm_add_product_btn")
                 ) {
                     Text("Guardar e Integrar", fontWeight = FontWeight.Bold)
@@ -383,6 +387,7 @@ private fun KpiCard(
 ) {
     Card(
         shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.2.dp, WarmBorder),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = modifier
@@ -417,6 +422,7 @@ private fun InventoryItemRow(
 ) {
     Card(
         shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.2.dp, WarmBorder),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth().testTag("inventory_item_${product.id}")

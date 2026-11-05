@@ -85,6 +85,7 @@ import com.example.model.ProductColor
 import com.example.model.getDrawableResId
 import com.example.ui.components.PriceEditDialog
 import com.example.ui.theme.AthenaGoldDark
+import com.example.ui.theme.AthenaGoldLight
 import java.util.Locale
 import com.example.R
 import com.example.model.ProductCategory
@@ -92,11 +93,14 @@ import com.example.ui.theme.AthenaPink
 import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.CrimsonSale
 import com.example.ui.theme.DancingScriptFontFamily
+import com.example.ui.theme.NeutralDark
+import com.example.ui.theme.NeutralMedium
 import com.example.ui.theme.ObsidianNight
 import com.example.ui.theme.RosaFluor
 import com.example.ui.theme.RosaFluorBright
 import com.example.ui.theme.RosaFluorGlow
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.WarmBorder
 import com.example.viewmodel.AthenaScreen
 import com.example.viewmodel.AthenaViewModel
 
@@ -126,15 +130,7 @@ fun PortadaScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color(0xFF14121E),
-                        Color(0xFF1C182E),
-                        Color(0xFF12101B)
-                    )
-                )
-            )
+            .background(Color.White)
             .testTag("portada_screen")
     ) {
         Column(
@@ -160,7 +156,8 @@ fun PortadaScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.95f))
+                        .background(Color(0xFFFBF8F6))
+                        .border(1.dp, WarmBorder, RoundedCornerShape(20.dp))
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Box(
@@ -175,7 +172,7 @@ fun PortadaScreen(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp,
-                        color = Color(0xFF1E1E1E)
+                        color = NeutralDark
                     )
                 }
 
@@ -228,8 +225,8 @@ fun PortadaScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(22.dp))
-                    .background(Color(0xFF1B172C))
-                    .border(1.6.dp, RosaFluor.copy(alpha = 0.55f), RoundedCornerShape(22.dp))
+                    .background(Color(0xFFFBF8F6))
+                    .border(1.dp, RosaFluor.copy(alpha = 0.35f), RoundedCornerShape(22.dp))
                     .padding(horizontal = 14.dp, vertical = 14.dp)
                     .testTag("portada_main_menu_card")
             ) {
@@ -257,7 +254,7 @@ fun PortadaScreen(
                     Text(
                         text = "Colecciones directas",
                         fontSize = 11.sp,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = NeutralMedium
                     )
                 }
 
@@ -306,7 +303,8 @@ fun PortadaScreen(
                     // 3. BOTÓN CONJUNTOS
                     Button(
                         onClick = { viewModel.openMenuSection(ProductCategory.SETS) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFF14121E)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = NeutralDark),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, WarmBorder),
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                         modifier = Modifier
@@ -335,13 +333,13 @@ fun PortadaScreen(
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                RosaFluor.copy(alpha = 0.16f),
-                                Color(0xFF1D182E).copy(alpha = 0.96f),
-                                Color(0xFF131122)
+                                RosaFluorGlow.copy(alpha = 0.50f),
+                                Color(0xFFFDFBFC),
+                                Color.White
                             )
                         )
                     )
-                    .border(2.dp, RosaFluor.copy(alpha = 0.85f), RoundedCornerShape(26.dp))
+                    .border(1.2.dp, RosaFluor.copy(alpha = 0.45f), RoundedCornerShape(26.dp))
                     .padding(horizontal = 20.dp, vertical = 26.dp)
                     .testTag("portada_center_branding_card")
             ) {
@@ -351,7 +349,7 @@ fun PortadaScreen(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.5.sp,
-                    color = Color.White.copy(alpha = 0.75f)
+                    color = NeutralMedium
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -414,7 +412,7 @@ fun PortadaScreen(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 3.sp,
-                    color = Color.White
+                    color = NeutralDark
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -424,7 +422,7 @@ fun PortadaScreen(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.2.sp,
-                    color = RosaFluorBright
+                    color = AthenaPinkDark
                 )
             }
 
@@ -435,8 +433,8 @@ fun PortadaScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF1A1628))
-                    .border(1.2.dp, RosaFluor.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                    .background(Color(0xFFFFF7F9))
+                    .border(1.dp, RosaFluor.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
                     .clickable {
                         viewModel.isOnlySaleFilter.value = true
                         viewModel.selectedCategory.value = ProductCategory.REBAJAS
@@ -456,7 +454,7 @@ fun PortadaScreen(
                             modifier = Modifier
                                 .size(38.dp)
                                 .clip(CircleShape)
-                                .background(CrimsonSale.copy(alpha = 0.25f))
+                                .background(CrimsonSale.copy(alpha = 0.15f))
                         ) {
                             Text(text = "🔥", fontSize = 18.sp)
                         }
@@ -471,7 +469,7 @@ fun PortadaScreen(
                             Text(
                                 text = "Prendas seleccionadas con hasta 40% OFF",
                                 fontSize = 11.sp,
-                                color = Color.White.copy(alpha = 0.8f)
+                                color = NeutralDark
                             )
                         }
                     }
@@ -491,8 +489,8 @@ fun PortadaScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(22.dp))
-                    .background(Color(0xFF14121E))
-                    .border(1.2.dp, AthenaPink.copy(alpha = 0.5f), RoundedCornerShape(22.dp))
+                    .background(Color(0xFFFBF8F6))
+                    .border(1.dp, WarmBorder, RoundedCornerShape(22.dp))
                     .padding(16.dp)
                     .testTag("portada_featured_products_card")
             ) {
@@ -507,12 +505,12 @@ fun PortadaScreen(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.5.sp,
-                            color = AthenaPink
+                            color = AthenaPinkDark
                         )
                         Text(
                             text = "Precios y compra directa al carrito",
                             fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.75f)
+                            color = NeutralMedium
                         )
                     }
 
@@ -530,14 +528,14 @@ fun PortadaScreen(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF222030))
-                                .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                .background(Color(0xFFF2ECE8))
+                                .border(1.dp, WarmBorder, CircleShape)
                                 .testTag("portada_header_arrow_prev")
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Correr fotos izquierda",
-                                tint = Color.White,
+                                tint = NeutralDark,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -551,14 +549,14 @@ fun PortadaScreen(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF222030))
-                                .border(1.dp, AthenaPink.copy(alpha = 0.5f), CircleShape)
+                                .background(Color(0xFFF2ECE8))
+                                .border(1.dp, WarmBorder, CircleShape)
                                 .testTag("portada_header_arrow_next")
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = "Correr fotos derecha",
-                                tint = Color.White,
+                                tint = NeutralDark,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -567,7 +565,7 @@ fun PortadaScreen(
                             text = "Ver Todo →",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = AthenaPink,
+                            color = AthenaPinkDark,
                             modifier = Modifier
                                 .clickable {
                                     viewModel.selectedCategory.value = ProductCategory.ALL
@@ -615,14 +613,14 @@ fun PortadaScreen(
                             .padding(start = 2.dp)
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF14121E).copy(alpha = 0.88f))
-                            .border(1.5.dp, AthenaPink, CircleShape)
+                            .background(Color.White.copy(alpha = 0.95f))
+                            .border(1.2.dp, AthenaPink, CircleShape)
                             .testTag("portada_side_arrow_prev")
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Correr prendas izquierda",
-                            tint = Color.White,
+                            tint = AthenaPinkDark,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -638,19 +636,21 @@ fun PortadaScreen(
                             .padding(end = 2.dp)
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF14121E).copy(alpha = 0.88f))
-                            .border(1.5.dp, AthenaPink, CircleShape)
+                            .background(Color.White.copy(alpha = 0.95f))
+                            .border(1.2.dp, AthenaPink, CircleShape)
                             .testTag("portada_side_arrow_next")
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Correr prendas derecha",
-                            tint = Color.White,
+                            tint = AthenaPinkDark,
                             modifier = Modifier.size(18.dp)
                         )
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // MAIN CALL TO ACTION: ENTRAR A LA TIENDA
             Button(
@@ -661,12 +661,11 @@ fun PortadaScreen(
                     viewModel.navigateTo(AthenaScreen.CATALOG)
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF14121E),
+                    containerColor = AthenaPink,
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(18.dp),
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, AthenaPink),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
@@ -677,7 +676,7 @@ fun PortadaScreen(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
-                        .background(AthenaPink)
+                        .background(Color.White.copy(alpha = 0.25f))
                 ) {
                     Icon(
                         imageVector = Icons.Default.ShoppingBag,
@@ -697,21 +696,22 @@ fun PortadaScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
-                    tint = AthenaPink,
+                    tint = Color.White,
                     modifier = Modifier.size(22.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // BOTTOM FROSTED QUICK SERVICE SHORTCUTS
+            // BOTTOM QUICK SERVICE SHORTCUTS
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .background(Color.White.copy(alpha = 0.95f))
+                    .background(Color(0xFFFBF8F6))
+                    .border(1.dp, WarmBorder, RoundedCornerShape(20.dp))
                     .padding(vertical = 10.dp, horizontal = 8.dp)
             ) {
                 QuickNavIcon(
@@ -719,19 +719,19 @@ fun PortadaScreen(
                     label = "Catálogo",
                     onClick = { viewModel.navigateTo(AthenaScreen.CATALOG) }
                 )
-                Box(modifier = Modifier.width(1.dp).height(24.dp).background(Color(0xFFDCDCDC)))
+                Box(modifier = Modifier.width(1.dp).height(24.dp).background(Color(0xFFE2DDD8)))
                 QuickNavIcon(
                     icon = Icons.Default.LocalShipping,
                     label = "Envíos GPS",
                     onClick = { viewModel.navigateTo(AthenaScreen.LIVE_TRACKING) }
                 )
-                Box(modifier = Modifier.width(1.dp).height(24.dp).background(Color(0xFFDCDCDC)))
+                Box(modifier = Modifier.width(1.dp).height(24.dp).background(Color(0xFFE2DDD8)))
                 QuickNavIcon(
                     icon = Icons.Default.ShoppingBag,
                     label = "Bolsa",
                     onClick = { viewModel.navigateTo(AthenaScreen.CART_CHECKOUT) }
                 )
-                Box(modifier = Modifier.width(1.dp).height(24.dp).background(Color(0xFFDCDCDC)))
+                Box(modifier = Modifier.width(1.dp).height(24.dp).background(Color(0xFFE2DDD8)))
                 QuickNavIcon(
                     icon = Icons.Default.Inventory2,
                     label = "Inventario",
@@ -795,7 +795,7 @@ private fun QuickNavIcon(
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = Color(0xFF14121E),
+            tint = NeutralDark,
             modifier = Modifier.size(22.dp)
         )
         Spacer(modifier = Modifier.height(2.dp))
@@ -803,7 +803,7 @@ private fun QuickNavIcon(
             text = label,
             fontSize = 10.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF14121E)
+            color = NeutralDark
         )
     }
 }
@@ -819,7 +819,9 @@ private fun PortadaFeaturedProductItem(
 
     Card(
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1A24)),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, WarmBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .width(220.dp)
             .clip(RoundedCornerShape(18.dp))
@@ -943,7 +945,7 @@ private fun PortadaFeaturedProductItem(
                     text = product.name,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = NeutralDark,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -969,7 +971,7 @@ private fun PortadaFeaturedProductItem(
                                 text = "$${String.format(Locale.US, "%.2f", product.originalPrice)}",
                                 fontSize = 11.sp,
                                 textDecoration = TextDecoration.LineThrough,
-                                color = Color.White.copy(alpha = 0.5f)
+                                color = NeutralMedium
                             )
                         }
                     }

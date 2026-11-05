@@ -47,8 +47,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -60,10 +63,16 @@ import com.example.model.Order
 import com.example.model.OrderStatus
 import com.example.model.TrackingTimelineEvent
 import com.example.ui.components.ShippingMapVisualizer
+import androidx.compose.foundation.BorderStroke
 import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
+import com.example.ui.theme.AthenaPink
+import com.example.ui.theme.AthenaPinkDark
+import com.example.ui.theme.NeutralDark
 import com.example.ui.theme.ObsidianNight
+import com.example.ui.theme.RosaFluor
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.WarmBorder
 import com.example.viewmodel.AthenaViewModel
 import java.util.Locale
 
@@ -72,6 +81,7 @@ fun LiveTrackingScreen(
     viewModel: AthenaViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val orders by viewModel.orders.collectAsState()
     val activeTrackedOrderId by viewModel.activeTrackedOrderId.collectAsState()
     val activeOrder by viewModel.activeTrackedOrder.collectAsState()
@@ -103,10 +113,10 @@ fun LiveTrackingScreen(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(if (isSelected) ObsidianNight else MaterialTheme.colorScheme.surfaceVariant)
+                            .background(if (isSelected) AthenaPink else Color(0xFFF2ECE8))
                             .border(
                                 1.dp,
-                                if (isSelected) AthenaGold else Color.Transparent,
+                                if (isSelected) AthenaPinkDark else WarmBorder,
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { viewModel.selectActiveOrder(ord.orderId) }
@@ -117,7 +127,7 @@ fun LiveTrackingScreen(
                             text = "Orden #${ord.orderId}",
                             fontSize = 12.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isSelected) AthenaGold else MaterialTheme.colorScheme.onSurface
+                            color = if (isSelected) Color.White else NeutralDark
                         )
                     }
                 }
@@ -186,8 +196,8 @@ fun LiveTrackingScreen(
                     Button(
                         onClick = { viewModel.advanceOrderTrackingStage(order.orderId) },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = ObsidianNight,
-                            contentColor = AthenaGold
+                            containerColor = AthenaPink,
+                            contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
@@ -214,6 +224,7 @@ fun LiveTrackingScreen(
             // Courier Contact Card
             Card(
                 shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.2.dp, WarmBorder),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -227,12 +238,12 @@ fun LiveTrackingScreen(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(AthenaGold)
+                            .background(AthenaPink.copy(alpha = 0.15f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Foto Mensajero",
-                            tint = ObsidianNight,
+                            tint = AthenaPinkDark,
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -241,26 +252,34 @@ fun LiveTrackingScreen(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
+                            text = "Vendedor: Athena_style",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = RosaFluor
+                        )
+                        Text(
                             text = order.courierName,
-                            fontSize = 14.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = order.courierVehicle,
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = order.courierPhone,
+                            text = "Celular: +54 9 2983 52-9883",
                             fontSize = 11.sp,
                             color = AthenaGoldDark,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
 
                     IconButton(
                         onClick = {
-                            viewModel.simulateCustomPushNotification(0)
+                            try {
+                                val intent = Intent(Intent.ACTION_DIAL).apply {
+                                    data = Uri.parse("tel:+5492983529883")
+                                }
+                                context.startActivity(intent)
+                            } catch (_: Exception) {
+                                viewModel.simulateCustomPushNotification(0)
+                            }
                         },
                         modifier = Modifier
                             .size(38.dp)
@@ -268,7 +287,7 @@ fun LiveTrackingScreen(
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                             .testTag("call_courier_btn")
                     ) {
-                        Icon(Icons.Default.Call, contentDescription = "Llamar", tint = StatusSuccess, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Call, contentDescription = "Llamar a Athena_style", tint = StatusSuccess, modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -411,7 +430,7 @@ private fun TimelineRow(
                         modifier = Modifier
                             .size(10.dp)
                             .clip(CircleShape)
-                            .background(ObsidianNight)
+                            .background(AthenaPink)
                     )
                 }
             }

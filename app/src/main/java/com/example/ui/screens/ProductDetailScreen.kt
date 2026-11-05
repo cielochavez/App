@@ -75,11 +75,15 @@ import com.example.model.getDrawableResId
 import com.example.ui.theme.AlabasterCream
 import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
+import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.CrimsonSale
 import com.example.ui.theme.GoldenSun
+import com.example.ui.theme.NeutralDark
+import com.example.ui.theme.NeutralMedium
 import com.example.ui.theme.ObsidianNight
 import com.example.ui.theme.RoseBronze
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.WarmBorder
 import com.example.viewmodel.AthenaViewModel
 import java.util.Locale
 
@@ -200,13 +204,14 @@ fun ProductDetailScreen(
                             .padding(start = 12.dp)
                             .size(46.dp)
                             .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.65f))
+                            .background(Color.White.copy(alpha = 0.92f))
+                            .border(1.2.dp, AthenaPink, CircleShape)
                             .testTag("detail_arrow_prev")
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Foto Anterior",
-                            tint = Color.White,
+                            tint = AthenaPinkDark,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -220,13 +225,14 @@ fun ProductDetailScreen(
                             .padding(end = 12.dp)
                             .size(46.dp)
                             .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.65f))
+                            .background(Color.White.copy(alpha = 0.92f))
+                            .border(1.2.dp, AthenaPink, CircleShape)
                             .testTag("detail_arrow_next")
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Foto Siguiente",
-                            tint = Color.White,
+                            tint = AthenaPinkDark,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -237,12 +243,13 @@ fun ProductDetailScreen(
                             .align(Alignment.BottomEnd)
                             .padding(16.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color.Black.copy(alpha = 0.7f))
+                            .background(Color.White.copy(alpha = 0.92f))
+                            .border(1.dp, WarmBorder, RoundedCornerShape(12.dp))
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = "Foto ${currentImageIndex + 1} de ${gallery.size}",
-                            color = Color.White,
+                            color = NeutralDark,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -263,13 +270,14 @@ fun ProductDetailScreen(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.5f))
+                            .background(Color.White.copy(alpha = 0.92f))
+                            .border(1.dp, WarmBorder, CircleShape)
                             .testTag("product_detail_back_btn")
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = NeutralDark
                         )
                     }
 
@@ -278,13 +286,14 @@ fun ProductDetailScreen(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.5f))
+                            .background(Color.White.copy(alpha = 0.92f))
+                            .border(1.dp, WarmBorder, CircleShape)
                             .testTag("product_detail_fav_btn")
                     ) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Favorito",
-                            tint = if (isFavorite) RoseBronze else Color.White
+                            tint = if (isFavorite) AthenaPinkDark else NeutralDark
                         )
                     }
                 }
@@ -314,12 +323,13 @@ fun ProductDetailScreen(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(ObsidianNight)
+                            .background(Color(0xFFFFF7F9))
+                            .border(1.dp, WarmBorder, RoundedCornerShape(8.dp))
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = product.category.displayName.uppercase(),
-                            color = AthenaGold,
+                            color = AthenaPinkDark,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )

@@ -63,9 +63,13 @@ import com.example.model.AppNotification
 import com.example.model.NotificationType
 import com.example.ui.theme.AthenaGold
 import com.example.ui.theme.AthenaGoldDark
+import com.example.ui.theme.AthenaPink
+import com.example.ui.theme.AthenaPinkDark
 import com.example.ui.theme.CrimsonSale
+import com.example.ui.theme.NeutralDark
 import com.example.ui.theme.ObsidianNight
 import com.example.ui.theme.StatusSuccess
+import com.example.ui.theme.WarmBorder
 import com.example.viewmodel.AthenaScreen
 import com.example.viewmodel.AthenaViewModel
 
@@ -135,6 +139,7 @@ fun NotificationCenterScreen(
         item {
             Card(
                 shape = RoundedCornerShape(16.dp),
+                border = androidx.compose.foundation.BorderStroke(1.2.dp, WarmBorder),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 modifier = Modifier.fillMaxWidth().testTag("push_simulator_panel")
             ) {
@@ -145,16 +150,16 @@ fun NotificationCenterScreen(
                             modifier = Modifier
                                 .size(28.dp)
                                 .clip(CircleShape)
-                                .background(AthenaGold)
+                                .background(AthenaPinkDark)
                         ) {
-                            Icon(Icons.Default.NotificationsActive, contentDescription = null, tint = ObsidianNight, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.NotificationsActive, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Disparador de Notificaciones Push",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = ObsidianNight
+                            color = NeutralDark
                         )
                     }
 
@@ -174,7 +179,7 @@ fun NotificationCenterScreen(
                     ) {
                         Button(
                             onClick = { viewModel.simulateCustomPushNotification(0) },
-                            colors = ButtonDefaults.buttonColors(containerColor = ObsidianNight, contentColor = AthenaGold),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF2ECE8), contentColor = NeutralDark),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.weight(1f).testTag("sim_push_shipping_btn")
                         ) {
@@ -183,7 +188,7 @@ fun NotificationCenterScreen(
 
                         Button(
                             onClick = { viewModel.simulateCustomPushNotification(1) },
-                            colors = ButtonDefaults.buttonColors(containerColor = ObsidianNight, contentColor = AthenaGold),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF2ECE8), contentColor = NeutralDark),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.weight(1f).testTag("sim_push_promo_btn")
                         ) {
@@ -199,7 +204,7 @@ fun NotificationCenterScreen(
                     ) {
                         Button(
                             onClick = { viewModel.simulateCustomPushNotification(2) },
-                            colors = ButtonDefaults.buttonColors(containerColor = ObsidianNight, contentColor = AthenaGold),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF2ECE8), contentColor = NeutralDark),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.weight(1f).testTag("sim_push_stock_btn")
                         ) {
@@ -208,7 +213,7 @@ fun NotificationCenterScreen(
 
                         Button(
                             onClick = { viewModel.simulateCustomPushNotification(3) },
-                            colors = ButtonDefaults.buttonColors(containerColor = ObsidianNight, contentColor = AthenaGold),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF2ECE8), contentColor = NeutralDark),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.weight(1f).testTag("sim_push_vip_btn")
                         ) {
@@ -236,13 +241,13 @@ fun NotificationCenterScreen(
                         onClick = { viewModel.notificationFilter.value = type },
                         label = { Text(type.label, fontSize = 11.sp) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = ObsidianNight,
-                            selectedLabelColor = AthenaGold
+                            selectedContainerColor = AthenaPink,
+                            selectedLabelColor = Color.White
                         ),
                         border = FilterChipDefaults.filterChipBorder(
                             enabled = true,
                             selected = isSelected,
-                            borderColor = if (isSelected) AthenaGold else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                            borderColor = if (isSelected) AthenaPink else WarmBorder
                         )
                     )
                 }
@@ -454,8 +459,8 @@ private fun PreferenceRow(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = ObsidianNight,
-                checkedTrackColor = AthenaGold
+                checkedThumbColor = Color.White,
+                checkedTrackColor = AthenaPink
             )
         )
     }
